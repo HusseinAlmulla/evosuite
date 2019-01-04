@@ -345,7 +345,7 @@ public abstract class Archive<F extends TestFitnessFunction, T extends TestChrom
    */
   @SuppressWarnings("unchecked")
   public <C extends Chromosome> C mergeArchiveAndSolution(C solution) {
-    if (solution instanceof TestChromosome) {
+     if (solution instanceof TestChromosome) {
       return (C) this.createMergedSolution((TestChromosome) solution);
     } else if (solution instanceof TestSuiteChromosome) {
       return (C) this.createMergedSolution((TestSuiteChromosome) solution);

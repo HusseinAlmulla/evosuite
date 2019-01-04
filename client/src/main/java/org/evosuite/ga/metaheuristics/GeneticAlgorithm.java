@@ -35,6 +35,10 @@ import java.util.Set;
 
 import org.evosuite.Properties;
 import org.evosuite.Properties.Algorithm;
+import org.evosuite.Properties.Criterion;
+import org.evosuite.coverage.CoverageCriteriaAnalyzer;
+import org.evosuite.coverage.FitnessFunctions;
+import org.evosuite.coverage.TestFitnessFactory;
 import org.evosuite.ga.Chromosome;
 import org.evosuite.ga.ChromosomeFactory;
 import org.evosuite.ga.FitnessFunction;
@@ -53,9 +57,12 @@ import org.evosuite.ga.populationlimit.IndividualPopulationLimit;
 import org.evosuite.ga.populationlimit.PopulationLimit;
 import org.evosuite.ga.stoppingconditions.MaxGenerationStoppingCondition;
 import org.evosuite.ga.stoppingconditions.StoppingCondition;
+import org.evosuite.runtime.Random;
 import org.evosuite.symbolic.DSEStats;
+import org.evosuite.testcase.TestFitnessFunction;
 import org.evosuite.testcase.execution.ExecutionTracer;
 import org.evosuite.testsuite.TestSuiteChromosome;
+import org.evosuite.testsuite.TestSuiteFitnessFunction;
 import org.evosuite.utils.ArrayUtil;
 import org.evosuite.utils.LoggingUtils;
 import org.evosuite.utils.Randomness;
@@ -67,8 +74,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Gordon Fraser
  */
-public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAlgorithm,
-		Serializable {
+public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAlgorithm, Serializable {
 
 	private static final long serialVersionUID = 5155609385855093435L;
 
@@ -170,15 +176,14 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	}
 
 	/**
-	 * enable and disable secondary criteria according to the strategy defined
-	 * in the Properties file.
+	 * enable and disable secondary criteria according to the strategy defined in
+	 * the Properties file.
 	 * 
 	 * @param starvationCounter
 	 */
 	protected void updateSecondaryCriterion(int starvationCounter) {
 
-		if (Properties.ENABLE_SECONDARY_OBJECTIVE_AFTER > 0
-				&& TestSuiteChromosome.getSecondaryObjectivesSize() > 1) {
+		if (Properties.ENABLE_SECONDARY_OBJECTIVE_AFTER > 0 && TestSuiteChromosome.getSecondaryObjectivesSize() > 1) {
 
 			double progress = this.progress() * 100.0;
 
@@ -190,15 +195,15 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 					Properties.ENABLE_SECONDARY_OBJECTIVE_AFTER = 0;
 				}
 			}
-		} else if (Properties.ENABLE_SECONDARY_OBJECTIVE_STARVATION
-				&& Properties.ENABLE_SECONDARY_OBJECTIVE_AFTER == 0
+		} else if (Properties.ENABLE_SECONDARY_OBJECTIVE_STARVATION && Properties.ENABLE_SECONDARY_OBJECTIVE_AFTER == 0
 				&& TestSuiteChromosome.getSecondaryObjectivesSize() > 1) {
 			updateSecondaryObjectiveStarvation(starvationCounter);
 		}
 	}
 
 	private void updateSecondaryObjectiveStarvation(int starvationCounter) {
-		if (starvationCounter > Properties.STARVATION_AFTER_GENERATION && !TestSuiteChromosome.isFirstSecondaryObjectiveEnabled()) {
+		if (starvationCounter > Properties.STARVATION_AFTER_GENERATION
+				&& !TestSuiteChromosome.isFirstSecondaryObjectiveEnabled()) {
 			enableFirstSecondaryCriterion();
 		} else {
 			if (starvationCounter == 0 && TestSuiteChromosome.isFirstSecondaryObjectiveEnabled()
@@ -209,8 +214,8 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	}
 
 	/**
-	 * Apply local search, starting from the best individual and continue
-	 * applying it to all individuals until the local search budget is used up.
+	 * Apply local search, starting from the best individual and continue applying
+	 * it to all individuals until the local search budget is used up.
 	 * 
 	 * The population list is re-ordered if needed.
 	 */
@@ -236,7 +241,7 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 				improvement = true;
 			}
 		}
-		
+
 		if (improvement) {
 			DSEStats.getInstance().reportNewIncrease();
 			updateProbability(true);
@@ -251,7 +256,7 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 			// If an improvement occurred to one of the individuals, it could
 			// be the case that the improvement was so good, that the individual
 			// has surpassed to the previous individual, which makes the population
-			// list not sorted any more. 
+			// list not sorted any more.
 			if (!populationIsSorted()) {
 				this.sortPopulation();
 			}
@@ -259,15 +264,14 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	}
 
 	/**
-	 * Returns true if the population is sorted according to the fitness 
-	 * values.
+	 * Returns true if the population is sorted according to the fitness values.
 	 * 
 	 * @return true if the population is sorted (or empty)
 	 */
 	private boolean populationIsSorted() {
 		Chromosome previousIndividual = null;
 		for (Chromosome currentIndividual : this.population) {
-			if (previousIndividual!=null) {
+			if (previousIndividual != null) {
 				if (!isBetterOrEqual(previousIndividual, currentIndividual)) {
 					// at least two individuals are not sorted
 					return false;
@@ -280,11 +284,10 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	}
 
 	/**
-	 * Returns true if the fitness functions are maximization functions
-	 * or false if all fitness functions are minimisation functions.
-	 * It expects that all fitnessFunctions are minimising or maximising,
-	 * it cannot happen that minimization and maximization functions are
-	 * together.
+	 * Returns true if the fitness functions are maximization functions or false if
+	 * all fitness functions are minimisation functions. It expects that all
+	 * fitnessFunctions are minimising or maximising, it cannot happen that
+	 * minimization and maximization functions are together.
 	 * 
 	 * @return
 	 */
@@ -292,7 +295,7 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 		return fitnessFunctions.get(0).isMaximizationFunction();
 	}
 
-	protected void updateProbability(boolean improvement){
+	protected void updateProbability(boolean improvement) {
 		if (improvement) {
 			localSearchProbability *= Properties.LOCAL_SEARCH_ADAPTATION_RATE;
 			localSearchProbability = Math.min(localSearchProbability, 1.0);
@@ -304,8 +307,7 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 		// 1.0 + ((1.0 - localSearchProbability) / localSearchProbability) *
 		// Math.exp(delta), -1.0);
 	}
-	
-	
+
 	/**
 	 * Apply dynamic symbolic execution
 	 */
@@ -328,10 +330,8 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	 * Math.min(Properties.DSE_ADAPTIVE_PROBABILITY, 1.0); } else {
 	 * Properties.DSE_ADAPTIVE_PROBABILITY /= Properties.DSE_ADAPTIVE_RATE;
 	 * Properties.DSE_ADAPTIVE_PROBABILITY =
-	 * Math.max(Properties.DSE_ADAPTIVE_PROBABILITY, Double.MIN_VALUE); }
-	 * logger.
-	 * info("Updating DSE probability to "+Properties.DSE_ADAPTIVE_PROBABILITY);
-	 * } }
+	 * Math.max(Properties.DSE_ADAPTIVE_PROBABILITY, Double.MIN_VALUE); } logger.
+	 * info("Updating DSE probability to "+Properties.DSE_ADAPTIVE_PROBABILITY); } }
 	 */
 	/**
 	 * Set up initial population
@@ -348,8 +348,8 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 
 	/**
 	 * Fills the population at first with recycled chromosomes - for more
-	 * information see recycleChromosomes() and ChromosomeRecycler - and after
-	 * that, the population is filled with random chromosomes.
+	 * information see recycleChromosomes() and ChromosomeRecycler - and after that,
+	 * the population is filled with random chromosomes.
 	 * 
 	 * This method guarantees at least a proportion of
 	 * Properties.initially_enforeced_Randomness % of random chromosomes
@@ -365,8 +365,8 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	 * This method can be used to kick out chromosomes when the population is
 	 * possibly overcrowded
 	 * 
-	 * Depending on the Property "starve_by_fitness" chromosome are either
-	 * kicked out randomly or according to their fitness
+	 * Depending on the Property "starve_by_fitness" chromosome are either kicked
+	 * out randomly or according to their fitness
 	 * 
 	 * @param limit
 	 *            a int.
@@ -487,8 +487,8 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 
 			for (FitnessFunction<T> ff : this.fitnessFunctions) {
 				DecimalFormat df = new DecimalFormat("#.#####");
-				str.append(", " + ff.getClass().getSimpleName().replace("CoverageSuiteFitness", "")
-						+ " " + df.format(c.getFitness(ff)));
+				str.append(", " + ff.getClass().getSimpleName().replace("CoverageSuiteFitness", "") + " "
+						+ df.format(c.getFitness(ff)));
 			}
 
 			i++;
@@ -497,13 +497,11 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 		return str.toString();
 	}
 
-	
 	/**
 	 * Set new fitness function (i.e., for new mutation)
 	 * 
 	 * @param function
-	 *            a
-	 *            {@link org.evosuite.ga.operators.selection.SelectionFunction}
+	 *            a {@link org.evosuite.ga.operators.selection.SelectionFunction}
 	 *            object.
 	 */
 	public void setSelectionFunction(SelectionFunction<T> function) {
@@ -523,7 +521,8 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	/**
 	 * Set the new ranking function (only used by MOO algorithms)
 	 * 
-	 * @param function a {@link org.evosuite.ga.operators.ranking.RankingFunction} object
+	 * @param function
+	 *            a {@link org.evosuite.ga.operators.ranking.RankingFunction} object
 	 */
 	public void setRankingFunction(RankingFunction<T> function) {
 		this.rankingFunction = function;
@@ -647,8 +646,7 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 		List<T> elite = new ArrayList<T>();
 
 		for (int i = 0; i < Properties.ELITE; i++) {
-			logger.trace("Copying individual " + i + " with fitness "
-					+ population.get(i).getFitness());
+			logger.trace("Copying individual " + i + " with fitness " + population.get(i).getFitness());
 			elite.add((T) population.get(i).clone());
 		}
 		logger.trace("Done.");
@@ -716,9 +714,8 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	 * 
 	 * if (!unique) { logger.debug("Applying kin compensation"); if
 	 * (fitnessFunction.isMaximizationFunction())
-	 * individual.setFitness(individual.getFitness()
-	 * Properties.KINCOMPENSATION); else
-	 * individual.setFitness(individual.getFitness() (2.0 -
+	 * individual.setFitness(individual.getFitness() Properties.KINCOMPENSATION);
+	 * else individual.setFitness(individual.getFitness() (2.0 -
 	 * Properties.KINCOMPENSATION)); } }
 	 */
 
@@ -751,8 +748,7 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 			return bestIndividuals;
 		}
 
-		if (Properties.ALGORITHM == Algorithm.NSGAII ||
-		    Properties.ALGORITHM == Algorithm.SPEA2)
+		if (Properties.ALGORITHM == Algorithm.NSGAII || Properties.ALGORITHM == Algorithm.SPEA2)
 			return population;
 
 		// Assume population is sorted
@@ -760,72 +756,73 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 		return bestIndividuals;
 	}
 
-    /**
-     * Write to a file all fitness values of each individuals.
-     *
-     * @param individuals a list of {@link org.evosuite.ga.Chromosome} object(s).
-     */
-    public void writeIndividuals(List<T> individuals) {
-      if (!Properties.WRITE_INDIVIDUALS) {
-        return;
-      }
+	/**
+	 * Write to a file all fitness values of each individuals.
+	 *
+	 * @param individuals
+	 *            a list of {@link org.evosuite.ga.Chromosome} object(s).
+	 */
+	public void writeIndividuals(List<T> individuals) {
+		if (!Properties.WRITE_INDIVIDUALS) {
+			return;
+		}
 
-      File dir = new File(Properties.REPORT_DIR);
-      if (!dir.exists()) {
-        if (!dir.mkdirs()) {
-          throw new RuntimeException("Cannot create report dir: " + Properties.REPORT_DIR);
-        }
-      }
+		File dir = new File(Properties.REPORT_DIR);
+		if (!dir.exists()) {
+			if (!dir.mkdirs()) {
+				throw new RuntimeException("Cannot create report dir: " + Properties.REPORT_DIR);
+			}
+		}
 
-      try {
-        File populationFile = new File(
-            Properties.REPORT_DIR + File.separator + "pareto_" + this.currentIteration + ".csv");
-        populationFile.createNewFile();
+		try {
+			File populationFile = new File(
+					Properties.REPORT_DIR + File.separator + "pareto_" + this.currentIteration + ".csv");
+			populationFile.createNewFile();
 
-        FileWriter fw = new FileWriter(populationFile.getAbsoluteFile());
-        BufferedWriter bw = new BufferedWriter(fw);
-        PrintWriter out = new PrintWriter(bw);
+			FileWriter fw = new FileWriter(populationFile.getAbsoluteFile());
+			BufferedWriter bw = new BufferedWriter(fw);
+			PrintWriter out = new PrintWriter(bw);
 
-        // header
-        List<String> l_string = new ArrayList<String>();
+			// header
+			List<String> l_string = new ArrayList<String>();
 
-        if (Properties.ALGORITHM == Algorithm.NSGAII) {
-          l_string.add("rank");
-        } else if (Properties.ALGORITHM == Algorithm.SPEA2) {
-          l_string.add("strength");
-        }
+			if (Properties.ALGORITHM == Algorithm.NSGAII) {
+				l_string.add("rank");
+			} else if (Properties.ALGORITHM == Algorithm.SPEA2) {
+				l_string.add("strength");
+			}
 
-        for (int i = 0; i < this.fitnessFunctions.size(); i++) {
-          l_string.add(this.fitnessFunctions.get(i).getClass().getSimpleName());
-        }
-        out.println(String.join(",", l_string));
+			for (int i = 0; i < this.fitnessFunctions.size(); i++) {
+				l_string.add(this.fitnessFunctions.get(i).getClass().getSimpleName());
+			}
+			out.println(String.join(",", l_string));
 
-        // content
-        for (int j = 0; j < individuals.size(); j++) {
-          l_string.clear();
+			// content
+			for (int j = 0; j < individuals.size(); j++) {
+				l_string.clear();
 
-          T individual = individuals.get(j);
-          if (Properties.ALGORITHM == Algorithm.NSGAII) {
-            l_string.add(Integer.toString(individual.getRank()));
-          } else if (Properties.ALGORITHM == Algorithm.SPEA2) {
-            l_string.add(Double.toString(individual.getDistance()));
-          }
+				T individual = individuals.get(j);
+				if (Properties.ALGORITHM == Algorithm.NSGAII) {
+					l_string.add(Integer.toString(individual.getRank()));
+				} else if (Properties.ALGORITHM == Algorithm.SPEA2) {
+					l_string.add(Double.toString(individual.getDistance()));
+				}
 
-          for (int i = 0; i < this.fitnessFunctions.size(); i++) {
-            l_string.add(Double.toString(individual.getFitness(this.fitnessFunctions.get(i))));
-          }
+				for (int i = 0; i < this.fitnessFunctions.size(); i++) {
+					l_string.add(Double.toString(individual.getFitness(this.fitnessFunctions.get(i))));
+				}
 
-          out.println(String.join(",", l_string));
-        }
+				out.println(String.join(",", l_string));
+			}
 
-        out.close();
-        bw.close();
-        fw.close();
+			out.close();
+			bw.close();
+			fw.close();
 
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * Set a new factory method
@@ -841,8 +838,7 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	 * Set a new xover function
 	 * 
 	 * @param crossover
-	 *            a
-	 *            {@link org.evosuite.ga.operators.crossover.CrossOverFunction}
+	 *            a {@link org.evosuite.ga.operators.crossover.CrossOverFunction}
 	 *            object.
 	 */
 	public void setCrossOverFunction(CrossOverFunction crossover) {
@@ -853,8 +849,7 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	 * Add a new search listener
 	 * 
 	 * @param listener
-	 *            a {@link org.evosuite.ga.metaheuristics.SearchListener}
-	 *            object.
+	 *            a {@link org.evosuite.ga.metaheuristics.SearchListener} object.
 	 */
 	public void addListener(SearchListener listener) {
 		listeners.add(listener);
@@ -864,8 +859,7 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	 * Remove a search listener
 	 * 
 	 * @param listener
-	 *            a {@link org.evosuite.ga.metaheuristics.SearchListener}
-	 *            object.
+	 *            a {@link org.evosuite.ga.metaheuristics.SearchListener} object.
 	 */
 	public void removeListener(SearchListener listener) {
 		listeners.remove(listener);
@@ -963,8 +957,7 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	 * Set a new population limit function
 	 * 
 	 * @param limit
-	 *            a {@link org.evosuite.ga.populationlimit.PopulationLimit}
-	 *            object.
+	 *            a {@link org.evosuite.ga.populationlimit.PopulationLimit} object.
 	 */
 	public void setPopulationLimit(PopulationLimit limit) {
 		this.populationLimit = limit;
@@ -1005,7 +998,7 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 		stoppingConditions.add(condition);
 		addListener(condition);
 	}
-	
+
 	public Set<StoppingCondition> getStoppingConditions() {
 		return stoppingConditions;
 	}
@@ -1080,16 +1073,16 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 		// The archive may contain tests evaluated with a fitness function
 		// that is not part of the optimization (e.g. ibranch secondary objective)
 		Iterator<FitnessFunction<?>> it = best.getCoverageValues().keySet().iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			FitnessFunction<?> ff = it.next();
-			if(!fitnessFunctions.contains(ff))
+			if (!fitnessFunctions.contains(ff))
 				it.remove();
 		}
 		population.add(0, best);
 	}
 
 	/**
-	 * Returns true if the <code>chromosome1</code> is better or equal than 
+	 * Returns true if the <code>chromosome1</code> is better or equal than
 	 * <code>chromosome2</code> according to the compound fitness function.
 	 * 
 	 * @param chromosome1
@@ -1108,8 +1101,8 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	}
 
 	/*
-	 * protected boolean isBetter(Chromosome chromosome1, Chromosome
-	 * chromosome2) { if (fitnessFunction.isMaximizationFunction()) { return
+	 * protected boolean isBetter(Chromosome chromosome1, Chromosome chromosome2) {
+	 * if (fitnessFunction.isMaximizationFunction()) { return
 	 * chromosome1.compareTo(chromosome2) > 0; } else { return
 	 * chromosome1.compareTo(chromosome2) < 0; } }
 	 */
@@ -1126,9 +1119,9 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	 * @return a {@link org.evosuite.ga.Chromosome} object.
 	 */
 	/*
-	 * protected Chromosome getBest(Chromosome chromosome1, Chromosome
-	 * chromosome2) { if (isBetterOrEqual(chromosome1, chromosome2)) return
-	 * chromosome1; else return chromosome2; }
+	 * protected Chromosome getBest(Chromosome chromosome1, Chromosome chromosome2)
+	 * { if (isBetterOrEqual(chromosome1, chromosome2)) return chromosome1; else
+	 * return chromosome2; }
 	 */
 
 	/**
@@ -1185,13 +1178,778 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	 * oos.defaultWriteObject(); oos.writeObject(Boolean.FALSE); } }
 	 * 
 	 * // assumes "static java.util.Date aDate;" declared private void
-	 * readObject(ObjectInputStream ois) throws ClassNotFoundException,
-	 * IOException { ois.defaultReadObject(); listeners = new
-	 * HashSet<SearchListener>(); stoppingConditions = new
-	 * HashSet<StoppingCondition>();
+	 * readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException
+	 * { ois.defaultReadObject(); listeners = new HashSet<SearchListener>();
+	 * stoppingConditions = new HashSet<StoppingCondition>();
 	 * 
 	 * boolean addStatistics = (Boolean) ois.readObject(); if (addStatistics) {
 	 * SearchStatistics.setInstance((SearchStatistics) ois.readObject());
 	 * addListener(SearchStatistics.getInstance()); } }
 	 */
+
+	//////////////////////////
+
+	// This to generate list of criteria, chosen randomly from the defualt 8
+	public Criterion[] getChosenCriteria() {
+		Criterion[] originalCriteria = new Criterion[] { Criterion.LINE, Criterion.BRANCH, Criterion.EXCEPTION,
+				Criterion.WEAKMUTATION, Criterion.OUTPUT, Criterion.METHOD, Criterion.METHODNOEXCEPTION,
+				Criterion.CBRANCH };
+		List<Criterion> originalCriteriaList = new ArrayList<Criterion>();
+		for (Criterion c : originalCriteria)
+			originalCriteriaList.add(c);
+		Collections.shuffle(originalCriteriaList);
+
+		/*
+		 * random() returns a number between 0.0 and 0.9, 7, becomes 0.0 to 6.93, add 1,
+		 * becomes 1.0 to 7.93, the integer will delete the .93.
+		 */
+		int lngth = (int) (Math.random() * 7 + 1);
+		if (lngth == 1)
+			System.out.println("h");
+		int start = 0;
+		if (lngth != 7)
+			start = Random.nextInt(7 - lngth);
+		System.out.println("lenght" + Integer.toString(lngth));
+		System.out.println("lenght" + Integer.toString(start));
+		originalCriteriaList = originalCriteriaList.subList(start, lngth);
+		Criterion[] subCriteria = new Criterion[lngth];
+		originalCriteriaList.toArray(subCriteria);
+		return subCriteria;
+	}
+
+	public Criterion[] getOneCriteria(int index) {
+		// Criterion[] originalCriteria = new Criterion[] {Criterion.LINE,
+		// Criterion.BRANCH, Criterion.EXCEPTION, Criterion.WEAKMUTATION,
+		// Criterion.OUTPUT, Criterion.METHOD, Criterion.METHODNOEXCEPTION,
+		// Criterion.CBRANCH };
+		Criterion[] subCriteria = new Criterion[3];
+		switch (index) {
+		// Combinations of two
+		case 0:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.LINE };
+			break;
+		case 1:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.EXCEPTION };
+			break;
+		case 2:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.WEAKMUTATION };
+			break;
+		case 3:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.OUTPUT };
+			break;
+		case 4:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.METHOD };
+			break;
+		case 5:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.CBRANCH };
+			break;
+		case 6:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.METHODNOEXCEPTION };
+			break;
+		case 7:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.EXCEPTION };
+			break;
+		case 8:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.METHOD };
+			break;
+		case 9:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.CBRANCH };
+			break;
+		case 10:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.METHODNOEXCEPTION };
+			break;
+		case 11:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.WEAKMUTATION };
+			break;
+		case 12:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.OUTPUT };
+			break;
+		case 13:
+			subCriteria = new Criterion[] { Criterion.CBRANCH, Criterion.METHOD };
+			break;
+		case 14:
+			subCriteria = new Criterion[] { Criterion.CBRANCH, Criterion.EXCEPTION };
+			break;
+		case 15:
+			subCriteria = new Criterion[] { Criterion.CBRANCH, Criterion.METHODNOEXCEPTION };
+			break;
+		case 16:
+			subCriteria = new Criterion[] { Criterion.CBRANCH, Criterion.WEAKMUTATION };
+			break;
+		case 17:
+			subCriteria = new Criterion[] { Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 18:
+			subCriteria = new Criterion[] { Criterion.METHOD, Criterion.EXCEPTION };
+			break;
+		case 19:
+			subCriteria = new Criterion[] { Criterion.METHOD, Criterion.METHODNOEXCEPTION };
+			break;
+		case 20:
+			subCriteria = new Criterion[] { Criterion.METHOD, Criterion.WEAKMUTATION };
+			break;
+		case 21:
+			subCriteria = new Criterion[] { Criterion.METHOD, Criterion.OUTPUT };
+			break;
+		case 22:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 23:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 24:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.OUTPUT };
+			break;
+		case 25:
+			subCriteria = new Criterion[] { Criterion.METHODNOEXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 26:
+			subCriteria = new Criterion[] { Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 27:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION, Criterion.OUTPUT };
+			break;
+
+		// Combinations of three
+
+		case 28:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.LINE, Criterion.OUTPUT };
+			break;
+		case 29:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.LINE, Criterion.CBRANCH };
+			break;
+		case 30:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.LINE, Criterion.METHODNOEXCEPTION };
+			break;
+		case 31:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.LINE, Criterion.EXCEPTION };
+			break;
+		case 32:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.LINE, Criterion.WEAKMUTATION };
+			break;
+		case 33:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.LINE, Criterion.METHOD };
+			break;
+		case 34:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.METHOD, Criterion.OUTPUT };
+			break;
+		case 35:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.METHOD, Criterion.CBRANCH };
+			break;
+		case 36:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.METHOD, Criterion.METHODNOEXCEPTION };
+			break;
+		case 37:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.METHOD, Criterion.EXCEPTION };
+			break;
+		case 38:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.METHOD, Criterion.WEAKMUTATION };
+			break;
+		case 39:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.OUTPUT };
+			break;
+		case 40:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.CBRANCH };
+			break;
+		case 41:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 42:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.EXCEPTION };
+			break;
+		case 43:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.EXCEPTION, Criterion.OUTPUT };
+			break;
+		case 44:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.EXCEPTION, Criterion.CBRANCH };
+			break;
+		case 45:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 46:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 47:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH };
+			break;
+		case 48:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 49:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.METHOD, Criterion.OUTPUT };
+			break;
+		case 50:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.METHOD, Criterion.CBRANCH };
+			break;
+		case 51:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.METHOD, Criterion.METHODNOEXCEPTION };
+			break;
+		case 52:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.METHOD, Criterion.EXCEPTION };
+			break;
+		case 53:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.METHOD, Criterion.WEAKMUTATION };
+			break;
+		case 54:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.WEAKMUTATION, Criterion.OUTPUT };
+			break;
+		case 55:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.WEAKMUTATION, Criterion.CBRANCH };
+			break;
+		case 56:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.WEAKMUTATION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 57:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.WEAKMUTATION, Criterion.EXCEPTION };
+			break;
+		case 58:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.EXCEPTION, Criterion.OUTPUT };
+			break;
+		case 59:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.EXCEPTION, Criterion.CBRANCH };
+			break;
+		case 60:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 61:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 62:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH };
+			break;
+		case 63:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 64:
+			subCriteria = new Criterion[] { Criterion.METHOD, Criterion.WEAKMUTATION, Criterion.OUTPUT };
+			break;
+		case 65:
+			subCriteria = new Criterion[] { Criterion.METHOD, Criterion.WEAKMUTATION, Criterion.CBRANCH };
+			break;
+		case 66:
+			subCriteria = new Criterion[] { Criterion.METHOD, Criterion.WEAKMUTATION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 67:
+			subCriteria = new Criterion[] { Criterion.METHOD, Criterion.WEAKMUTATION, Criterion.EXCEPTION };
+			break;
+		case 68:
+			subCriteria = new Criterion[] { Criterion.METHOD, Criterion.EXCEPTION, Criterion.OUTPUT };
+			break;
+		case 69:
+			subCriteria = new Criterion[] { Criterion.METHOD, Criterion.EXCEPTION, Criterion.CBRANCH };
+			break;
+		case 70:
+			subCriteria = new Criterion[] { Criterion.METHOD, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 71:
+			subCriteria = new Criterion[] { Criterion.METHOD, Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 72:
+			subCriteria = new Criterion[] { Criterion.METHOD, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH };
+			break;
+		case 73:
+			subCriteria = new Criterion[] { Criterion.METHOD, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 74:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION, Criterion.EXCEPTION, Criterion.OUTPUT };
+			break;
+		case 75:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION, Criterion.EXCEPTION, Criterion.CBRANCH };
+			break;
+		case 76:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 77:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION, Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 78:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH };
+			break;
+		case 79:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 80:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 81:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH };
+			break;
+		case 82:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 83:
+			subCriteria = new Criterion[] { Criterion.METHODNOEXCEPTION, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+
+		// one
+		case 84:
+			subCriteria = new Criterion[] { Criterion.BRANCH };
+			break;
+		case 85:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION };
+			break;
+		case 86:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION };
+			break;
+		case 87:
+			subCriteria = new Criterion[] { Criterion.METHODNOEXCEPTION };
+			break;
+		case 88:
+			subCriteria = new Criterion[] { Criterion.OUTPUT };
+			break;
+		case 89:
+			subCriteria = new Criterion[] { Criterion.CBRANCH };
+			break;
+		case 90:
+			subCriteria = new Criterion[] { Criterion.METHOD };
+			break;
+		case 91:
+			subCriteria = new Criterion[] { Criterion.LINE };
+			break;
+
+		}
+
+		// Criterion[] subCriteria = new Criterion[] {originalCriteria[index]};
+		return subCriteria;
+	}
+
+	public Criterion[] getOneCriteriaWithException(int index) {
+		// Criterion[] originalCriteria = new Criterion[] {Criterion.LINE,
+		// Criterion.BRANCH, Criterion.EXCEPTION, Criterion.WEAKMUTATION,
+		// Criterion.OUTPUT, Criterion.METHOD, Criterion.METHODNOEXCEPTION,
+		// Criterion.CBRANCH };
+		Criterion[] subCriteria = new Criterion[3];
+		switch (index) {
+		case 0:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.EXCEPTION, Criterion.LINE, Criterion.CBRANCH };
+			break;
+		case 1:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION, Criterion.EXCEPTION, Criterion.LINE };
+			break;
+		case 2:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION };
+			break;
+		case 3:
+			subCriteria = new Criterion[] { Criterion.METHODNOEXCEPTION };
+			break;
+		case 4:
+			subCriteria = new Criterion[] { Criterion.OUTPUT, Criterion.EXCEPTION, Criterion.LINE };
+			break;
+		case 5:
+			subCriteria = new Criterion[] { Criterion.CBRANCH };
+			break;
+		case 6:
+			subCriteria = new Criterion[] { Criterion.METHOD };
+			break;
+		case 7:
+			subCriteria = new Criterion[] { Criterion.LINE };
+			break;
+
+		case 8:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH };
+			break;
+		case 9:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 10:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 11:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.OUTPUT };
+			break;
+		case 12:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.CBRANCH };
+			break;
+		case 13:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHOD };
+			break;
+		case 14:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.LINE };
+			break;
+
+		case 15:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH, Criterion.LINE };
+			break;
+		case 16:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH, Criterion.WEAKMUTATION };
+			break;
+		case 17:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH, Criterion.OUTPUT };
+			break;
+		case 18:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH, Criterion.METHOD };
+			break;
+		case 19:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH, Criterion.CBRANCH };
+			break;
+		case 20:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH, Criterion.METHODNOEXCEPTION };
+			break;
+		case 21:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.LINE, Criterion.METHOD };
+			break;
+		case 22:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.LINE, Criterion.CBRANCH };
+			break;
+		case 23:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.LINE, Criterion.METHODNOEXCEPTION };
+			break;
+		case 24:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.LINE, Criterion.WEAKMUTATION };
+			break;
+		case 25:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.LINE, Criterion.OUTPUT };
+			break;
+		case 26:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.CBRANCH, Criterion.METHOD };
+			break;
+		case 27:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.CBRANCH, Criterion.METHODNOEXCEPTION };
+			break;
+		case 28:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.CBRANCH, Criterion.WEAKMUTATION };
+			break;
+		case 29:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 30:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHOD, Criterion.METHODNOEXCEPTION };
+			break;
+		case 31:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHOD, Criterion.WEAKMUTATION };
+			break;
+		case 32:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHOD, Criterion.OUTPUT };
+			break;
+		case 33:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 34:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 35:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.WEAKMUTATION, Criterion.OUTPUT };
+			break;
+
+		// Combinations of three
+		case 36:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH, Criterion.LINE, Criterion.OUTPUT };
+			break;
+		case 37:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH, Criterion.LINE, Criterion.CBRANCH };
+			break;
+		case 38:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH, Criterion.LINE,
+					Criterion.METHODNOEXCEPTION };
+			break;
+		case 39:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH, Criterion.LINE,
+					Criterion.WEAKMUTATION };
+			break;
+		case 40:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH, Criterion.LINE, Criterion.METHOD };
+			break;
+		case 41:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH, Criterion.METHOD, Criterion.OUTPUT };
+			break;
+		case 42:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH, Criterion.METHOD,
+					Criterion.CBRANCH };
+			break;
+		case 43:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH, Criterion.METHOD,
+					Criterion.METHODNOEXCEPTION };
+			break;
+		case 44:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH, Criterion.METHOD,
+					Criterion.EXCEPTION };
+			break;
+		case 45:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH, Criterion.METHOD,
+					Criterion.WEAKMUTATION };
+			break;
+		case 46:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH, Criterion.WEAKMUTATION,
+					Criterion.OUTPUT };
+			break;
+		case 47:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH, Criterion.WEAKMUTATION,
+					Criterion.CBRANCH };
+			break;
+		case 48:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH, Criterion.WEAKMUTATION,
+					Criterion.METHODNOEXCEPTION };
+			break;
+		case 49:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH, Criterion.METHODNOEXCEPTION,
+					Criterion.OUTPUT };
+			break;
+		case 50:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH, Criterion.METHODNOEXCEPTION,
+					Criterion.CBRANCH };
+			break;
+		case 51:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH, Criterion.CBRANCH,
+					Criterion.OUTPUT };
+			break;
+		case 52:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.LINE, Criterion.METHOD, Criterion.OUTPUT };
+			break;
+		case 53:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.LINE, Criterion.METHOD, Criterion.CBRANCH };
+			break;
+		case 54:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.LINE, Criterion.METHOD,
+					Criterion.METHODNOEXCEPTION };
+			break;
+		case 55:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.LINE, Criterion.METHOD,
+					Criterion.WEAKMUTATION };
+			break;
+		case 56:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.LINE, Criterion.WEAKMUTATION,
+					Criterion.OUTPUT };
+			break;
+		case 57:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.LINE, Criterion.WEAKMUTATION,
+					Criterion.CBRANCH };
+			break;
+		case 58:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.LINE, Criterion.WEAKMUTATION,
+					Criterion.METHODNOEXCEPTION };
+			break;
+		case 59:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.LINE, Criterion.METHODNOEXCEPTION,
+					Criterion.OUTPUT };
+			break;
+		case 60:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.LINE, Criterion.METHODNOEXCEPTION,
+					Criterion.CBRANCH };
+			break;
+		case 61:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.LINE, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 62:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHOD, Criterion.WEAKMUTATION,
+					Criterion.OUTPUT };
+			break;
+		case 63:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHOD, Criterion.WEAKMUTATION,
+					Criterion.CBRANCH };
+			break;
+		case 64:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHOD, Criterion.WEAKMUTATION,
+					Criterion.METHODNOEXCEPTION };
+			break;
+		case 65:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHOD, Criterion.METHODNOEXCEPTION,
+					Criterion.OUTPUT };
+			break;
+		case 66:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHOD, Criterion.METHODNOEXCEPTION,
+					Criterion.CBRANCH };
+			break;
+		case 67:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHOD, Criterion.CBRANCH,
+					Criterion.OUTPUT };
+			break;
+		case 68:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.WEAKMUTATION, Criterion.METHODNOEXCEPTION,
+					Criterion.OUTPUT };
+			break;
+		case 69:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.WEAKMUTATION, Criterion.METHODNOEXCEPTION,
+					Criterion.CBRANCH };
+			break;
+		case 70:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.WEAKMUTATION, Criterion.CBRANCH,
+					Criterion.OUTPUT };
+			break;
+		case 71:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH,
+					Criterion.OUTPUT };
+			break;
+
+		}
+
+		// Criterion[] subCriteria = new Criterion[] {originalCriteria[index]};
+		return subCriteria;
+	}
+
+	public void removeFitnessFunction(Criterion[] temp) {
+		// TestsArchive.instance.reset();
+		Properties.CRITERION = temp;
+		List<TestSuiteFitnessFunction> ffs = getFitnessFunctions1();
+		this.fitnessFunctions.clear();
+		this.addFitnessFunctions((List) ffs);
+		List<TestFitnessFunction> goals = getGoals(true);
+		// deleteFitnessFromPopulation();
+		calculateFitnessAndSortPopulation();
+		// updateFitnessFunctionsAndValues(true);
+		deleteUpdatFitnessFromPopulation();
+	}
+
+	/// this to remove the deleted fitness functions from the population
+	protected void deleteFitnessFromPopulation() {
+		for (T individual : population) {
+			individual.clearFitnessVlaue();
+			for (FitnessFunction<?> fitnessFunction : this.fitnessFunctions) {
+				individual.addFitness(fitnessFunction);
+			}
+		}
+	}
+
+	/**
+	 * update archive fitness functions
+	 */
+	protected void updateFitnessFunctionsAndValues(boolean fitnessNeedsUpdating) {
+		for (FitnessFunction<T> f : fitnessFunctions) {
+			f.updateCoveredGoals();
+		}
+		for (T t : population) {
+			for (FitnessFunction<T> fitnessFunction : fitnessFunctions) {
+				fitnessFunction.getFitness(t);
+			}
+		}
+	}
+
+	protected void deleteUpdatFitnessFromPopulation() {
+		for (T individual : population) {
+			individual.clearFitnessVlaue();
+			for (FitnessFunction<T> fitnessFunction : this.fitnessFunctions) {
+				individual.addFitness(fitnessFunction);
+				fitnessFunction.updateCoveredGoals();
+				fitnessFunction.getFitness(individual);
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * 
+	 * /** Convert criterion names to test suite fitness functions
+	 * 
+	 * @return
+	 */
+	protected List<TestSuiteFitnessFunction> getFitnessFunctions1() {
+		List<TestSuiteFitnessFunction> ffs = new ArrayList<TestSuiteFitnessFunction>();
+		for (int i = 0; i < Properties.CRITERION.length; i++) {
+			TestSuiteFitnessFunction newFunction = FitnessFunctions.getFitnessFunction(Properties.CRITERION[i]);
+
+			// If this is compositional fitness, we need to make sure
+			// that all functions are consistently minimization or
+			// maximization functions
+			if (Properties.ALGORITHM != Algorithm.NSGAII && Properties.ALGORITHM != Algorithm.SPEA2) {
+				for (TestSuiteFitnessFunction oldFunction : ffs) {
+					if (oldFunction.isMaximizationFunction() != newFunction.isMaximizationFunction()) {
+						StringBuffer sb = new StringBuffer();
+						sb.append("* Invalid combination of fitness functions: ");
+						sb.append(oldFunction.toString());
+						if (oldFunction.isMaximizationFunction())
+							sb.append(" is a maximization function ");
+						else
+							sb.append(" is a minimization function ");
+						sb.append(" but ");
+						sb.append(newFunction.toString());
+						if (newFunction.isMaximizationFunction())
+							sb.append(" is a maximization function ");
+						else
+							sb.append(" is a minimization function ");
+						LoggingUtils.getEvoLogger().info(sb.toString());
+						throw new RuntimeException("Invalid combination of fitness functions");
+					}
+				}
+			}
+			ffs.add(newFunction);
+
+		}
+
+		return ffs;
+	}
+
+	/**
+	 * Convert criterion names to factories for test case fitness functions
+	 * 
+	 * @return
+	 */
+	public static List<TestFitnessFactory<? extends TestFitnessFunction>> getFitnessFactories() {
+		List<TestFitnessFactory<? extends TestFitnessFunction>> goalsFactory = new ArrayList<TestFitnessFactory<? extends TestFitnessFunction>>();
+		for (int i = 0; i < Properties.CRITERION.length; i++) {
+			goalsFactory.add(FitnessFunctions.getFitnessFactory(Properties.CRITERION[i]));
+		}
+
+		return goalsFactory;
+	}
+
+	private List<TestFitnessFunction> getGoals(boolean verbose) {
+		List<TestFitnessFactory<? extends TestFitnessFunction>> goalFactories = getFitnessFactories();
+		List<TestFitnessFunction> goals = new ArrayList<>();
+
+		if (goalFactories.size() == 1) {
+			TestFitnessFactory<? extends TestFitnessFunction> factory = goalFactories.iterator().next();
+			goals.addAll(factory.getCoverageGoals());
+
+			if (verbose) {
+				LoggingUtils.getEvoLogger().info("* Total number of test goals: {}", factory.getCoverageGoals().size());
+				if (Properties.PRINT_GOALS) {
+					for (TestFitnessFunction goal : factory.getCoverageGoals())
+						LoggingUtils.getEvoLogger().info("" + goal.toString());
+				}
+			}
+		} else {
+			if (verbose) {
+				LoggingUtils.getEvoLogger().info("* Total number of test goals: ");
+			}
+
+			for (TestFitnessFactory<? extends TestFitnessFunction> goalFactory : goalFactories) {
+				goals.addAll(goalFactory.getCoverageGoals());
+
+				if (verbose) {
+					LoggingUtils.getEvoLogger()
+							.info("  - " + goalFactory.getClass().getSimpleName().replace("CoverageFactory", "") + " "
+									+ goalFactory.getCoverageGoals().size());
+					if (Properties.PRINT_GOALS) {
+						for (TestFitnessFunction goal : goalFactory.getCoverageGoals())
+							LoggingUtils.getEvoLogger().info("" + goal.toString());
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	protected void sortPopulationNew() {
+		if (Properties.SHUFFLE_GOALS)
+			Randomness.shuffle(population);
+
+		if (isMaximizationFunction()) {
+			Collections.sort(population, Collections.reverseOrder());
+		} else {
+			T tMax = population.get(0);
+			TestSuiteChromosome max = (TestSuiteChromosome) population.get(0);
+			int[] fsmax = CoverageCriteriaAnalyzer.analyzeCoverageNew(max, Criterion.EXCEPTION);
+			int fmax = fsmax[0] + fsmax[1];
+
+			for (int i = 1; i < population.size(); i++) {
+
+				TestSuiteChromosome tmp = (TestSuiteChromosome) population.get(i);
+				int[] fs = CoverageCriteriaAnalyzer.analyzeCoverageNew(tmp, Criterion.EXCEPTION);
+				int f = fs[0] + fs[1];
+
+				if (f > fmax) {
+					tMax = population.get(i);
+					max = tmp;
+					fsmax = fs;
+					fmax = f;
+				}
+			}
+			T tmp1 = population.get(0);
+			int ind = population.indexOf(tMax);
+			population.set(0, tMax);
+			population.set(ind, tmp1);
+		}
+	}
+
+	///////////////////////
+
 }

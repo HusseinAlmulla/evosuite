@@ -346,4 +346,39 @@ public class CoverageCriteriaAnalyzer {
                 return null;
         }
     }
+    
+    
+    ///////////////////////////////////////////////////////////////////////////
+    
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static int[] analyzeCoverageNew(TestSuiteChromosome testSuite, Properties.Criterion criterion) {
+    	//analyzeCoverage(testSuite, criterion, false);
+    	
+    	TestSuiteChromosome testSuiteCopy = testSuite.clone();
+    	TestFitnessFactory factory = FitnessFunctions.getFitnessFactory(criterion);
+    	List<TestFitnessFunction> goals = factory.getCoverageGoals();
+    	Collections.sort(goals);
+    	int covered = 0;
+
+    	
+    	for (TestFitnessFunction goal : goals) {
+    		if (goal.isCoveredBy(testSuiteCopy)) {
+    			covered++;
+    		} 
+    	}
+
+    	double coverage_score = 0;
+    	if (goals.isEmpty()) {
+
+    	} else {
+    		coverage_score = (double) covered / (double) goals.size();
+
+    	}
+    	//return coverage_score;
+    	//int[] ret = {goals.size(),covered};
+    	int[] ret = {(int)(100*coverage_score),(int)(100*coverage_score)};
+    	return ret;        
+    }
+
+    ////////////////////////////////////////////////////////
 }

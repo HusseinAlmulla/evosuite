@@ -30,6 +30,7 @@ import org.evosuite.coverage.CoverageCriteriaAnalyzer;
 import org.evosuite.coverage.FitnessFunctions;
 import org.evosuite.coverage.TestFitnessFactory;
 import org.evosuite.coverage.dataflow.DefUseCoverageSuiteFitness;
+import org.evosuite.coverage.exception.ExceptionCoverageSuiteFitness;
 import org.evosuite.ga.metaheuristics.GeneticAlgorithm;
 import org.evosuite.ga.stoppingconditions.StoppingCondition;
 import org.evosuite.junit.JUnitAnalyzer;
@@ -90,7 +91,6 @@ public class TestSuiteGenerator {
 	private static final String FOR_NAME = "forName";
 	private static Logger logger = LoggerFactory.getLogger(TestSuiteGenerator.class);
 
-
 	private void initializeTargetClass() throws Throwable {
 		String cp = ClassPathHandler.getInstance().getTargetProjectClasspath();
 		// Here is where the <clinit> code should be invoked for the first time
@@ -109,7 +109,8 @@ public class TestSuiteGenerator {
 		}
 
 		DependencyAnalysis.analyzeClass(Properties.TARGET_CLASS, Arrays.asList(cp.split(File.pathSeparator)));
-		LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier() + "Finished analyzing classpath");
+		LoggingUtils.getEvoLogger()
+				.info("* " + ClientProcess.getPrettyPrintIdentifier() + "Finished analyzing classpath");
 	}
 
 	/**
@@ -135,45 +136,53 @@ public class TestSuiteGenerator {
 			// If the bytecode for a method exceeds 64K, Java will complain
 			// Very often this is due to mutation instrumentation, so this dirty
 			// hack adds a fallback mode without mutation.
-			// This currently breaks statistics and assertions, so we have to also set these properties
+			// This currently breaks statistics and assertions, so we have to also set these
+			// properties
 			boolean error = true;
 
 			String message = e.getMessage();
-			if (message != null && (message.contains("Method code too large") || message.contains("Class file too large"))) {
+			if (message != null
+					&& (message.contains("Method code too large") || message.contains("Class file too large"))) {
 				LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier()
-                        + "Instrumentation exceeds Java's 64K limit per method in target class");
-				Properties.Criterion[] newCriteria = Arrays.stream(Properties.CRITERION).filter(t -> !t.equals(Properties.Criterion.STRONGMUTATION) && !t.equals(Properties.Criterion.WEAKMUTATION) && !t.equals(Properties.Criterion.MUTATION)).toArray(Properties.Criterion[]::new);
-				if(newCriteria.length < Properties.CRITERION.length) {
+						+ "Instrumentation exceeds Java's 64K limit per method in target class");
+				Properties.Criterion[] newCriteria = Arrays.stream(Properties.CRITERION)
+						.filter(t -> !t.equals(Properties.Criterion.STRONGMUTATION)
+								&& !t.equals(Properties.Criterion.WEAKMUTATION)
+								&& !t.equals(Properties.Criterion.MUTATION))
+						.toArray(Properties.Criterion[]::new);
+				if (newCriteria.length < Properties.CRITERION.length) {
 					TestGenerationContext.getInstance().resetContext();
 					LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier()
-                            + "Attempting re-instrumentation without mutation");
+							+ "Attempting re-instrumentation without mutation");
 					Properties.CRITERION = newCriteria;
-					if(Properties.NEW_STATISTICS) {
+					if (Properties.NEW_STATISTICS) {
 						LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier()
-                                + "Deactivating EvoSuite statistics because of instrumentation problem");
+								+ "Deactivating EvoSuite statistics because of instrumentation problem");
 						Properties.NEW_STATISTICS = false;
 					}
 
 					try {
 						initializeTargetClass();
 						error = false;
-					} catch(Throwable t) {
+					} catch (Throwable t) {
 						// No-op, error handled below
 					}
-					if(Properties.ASSERTIONS && Properties.ASSERTION_STRATEGY == AssertionStrategy.MUTATION) {
+					if (Properties.ASSERTIONS && Properties.ASSERTION_STRATEGY == AssertionStrategy.MUTATION) {
 						LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier()
-                                + "Deactivating assertion minimization because mutation instrumentation does not work");
+								+ "Deactivating assertion minimization because mutation instrumentation does not work");
 						Properties.ASSERTION_STRATEGY = AssertionStrategy.ALL;
 					}
 				}
 			}
 
-		    if(error) {
-				LoggingUtils.getEvoLogger().error("* " + ClientProcess.getPrettyPrintIdentifier()
-                        + "Error while initializing target class: "
-						+ (e.getMessage() != null ? e.getMessage() : e.toString()));
+			if (error) {
+				LoggingUtils.getEvoLogger()
+						.error("* " + ClientProcess.getPrettyPrintIdentifier()
+								+ "Error while initializing target class: "
+								+ (e.getMessage() != null ? e.getMessage() : e.toString()));
 				logger.error("Problem for " + Properties.TARGET_CLASS + ". Full stack:", e);
-				return TestGenerationResultBuilder.buildErrorResult(e.getMessage() != null ? e.getMessage() : e.toString());
+				return TestGenerationResultBuilder
+						.buildErrorResult(e.getMessage() != null ? e.getMessage() : e.toString());
 			}
 
 		} finally {
@@ -187,14 +196,13 @@ public class TestSuiteGenerator {
 		}
 
 		/*
-		 * Initialises the object pool with objects carved from SELECTED_JUNIT
-		 * classes
+		 * Initialises the object pool with objects carved from SELECTED_JUNIT classes
 		 */
 		// TODO: Do parts of this need to be wrapped into sandbox statements?
 		ObjectPoolManager.getInstance();
 
 		LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier() + "Generating tests for class "
-                + Properties.TARGET_CLASS);
+				+ Properties.TARGET_CLASS);
 		TestSuiteGeneratorHelper.printTestCriterion();
 
 		if (!Properties.hasTargetClassBeenLoaded()) {
@@ -205,13 +213,13 @@ public class TestSuiteGenerator {
 		if (Properties.isRegression() && Properties.REGRESSION_SKIP_SIMILAR) {
 			// Sanity checks
 			if (Properties.getTargetClassRegression(true) == null) {
-			    Properties.IGNORE_MISSING_STATISTICS = false;
+				Properties.IGNORE_MISSING_STATISTICS = false;
 				logger.error("class {} was not on the regression projectCP", Properties.TARGET_CLASS);
 				return TestGenerationResultBuilder.buildErrorResult("Could not load target regression class");
 			}
 			if (!ResourceList.getInstance(TestGenerationContext.getInstance().getRegressionClassLoaderForSUT())
 					.hasClass(Properties.TARGET_CLASS)) {
-			    Properties.IGNORE_MISSING_STATISTICS = false;
+				Properties.IGNORE_MISSING_STATISTICS = false;
 				logger.error("class {} was not on the regression_cp", Properties.TARGET_CLASS);
 				return TestGenerationResultBuilder.buildErrorResult(
 						"Class " + Properties.TARGET_CLASS + " did not exist on regression classpath");
@@ -223,7 +231,7 @@ public class TestSuiteGenerator {
 			// If classes are different, no point in continuing.
 			// TODO: report it to master to create a nice regression report
 			if (!areDifferent) {
-			    Properties.IGNORE_MISSING_STATISTICS = false;
+				Properties.IGNORE_MISSING_STATISTICS = false;
 				logger.error("class {} was equal on both versions", Properties.TARGET_CLASS);
 				return TestGenerationResultBuilder.buildErrorResult(
 						"Class " + Properties.TARGET_CLASS + " was not changed between the two versions");
@@ -237,15 +245,19 @@ public class TestSuiteGenerator {
 			if (!sameBranches) {
 				Properties.IGNORE_MISSING_STATISTICS = false;
 				logger.error("Could not match the branches across the two versions.");
-				return TestGenerationResultBuilder.buildErrorResult("Could not match the branches across the two versions.");
+				return TestGenerationResultBuilder
+						.buildErrorResult("Could not match the branches across the two versions.");
 			}
 		}
 
 		TestSuiteChromosome testCases = generateTests();
 
-		// As post process phases such as minimisation, coverage analysis, etc., may call getFitness()
-		// of each fitness function, which may try to update the Archive, in here we explicitly disable
-		// Archive to avoid any problem and at the same time to improve the performance of post process
+		// As post process phases such as minimisation, coverage analysis, etc., may
+		// call getFitness()
+		// of each fitness function, which may try to update the Archive, in here we
+		// explicitly disable
+		// Archive to avoid any problem and at the same time to improve the performance
+		// of post process
 		// phases (as no CPU cycles would be wasted updating the Archive).
 		Properties.TEST_ARCHIVE = false;
 
@@ -262,8 +274,8 @@ public class TestSuiteGenerator {
 		}
 		TestCaseExecutor.pullDown();
 		/*
-		 * TODO: when we will have several processes running in parallel, we ll
-		 * need to handle the gathering of the statistics.
+		 * TODO: when we will have several processes running in parallel, we ll need to
+		 * handle the gathering of the statistics.
 		 */
 		ClientServices.getInstance().getClientNode().changeState(ClientState.WRITING_STATISTICS);
 
@@ -274,9 +286,11 @@ public class TestSuiteGenerator {
 	}
 
 	/**
-	 * Returns true iif the test case execution has thrown an instance of ExceptionInInitializerError
+	 * Returns true iif the test case execution has thrown an instance of
+	 * ExceptionInInitializerError
 	 * 
-	 * @param execResult of the test case execution
+	 * @param execResult
+	 *            of the test case execution
 	 * @return true if the test case has thrown an ExceptionInInitializerError
 	 */
 	private static boolean hasThrownInitializerError(ExecutionResult execResult) {
@@ -287,18 +301,18 @@ public class TestSuiteGenerator {
 		}
 		return false;
 	}
-	
-	
+
 	/**
-	 * Returns the initialized  error from the test case execution
+	 * Returns the initialized error from the test case execution
 	 * 
-	 * @param execResult of the test case execution
+	 * @param execResult
+	 *            of the test case execution
 	 * @return null if there were no thrown instances of ExceptionInInitializerError
 	 */
 	private static ExceptionInInitializerError getInitializerError(ExecutionResult execResult) {
 		for (Throwable t : execResult.getAllThrownExceptions()) {
 			if (t instanceof ExceptionInInitializerError) {
-				ExceptionInInitializerError exceptionInInitializerError = (ExceptionInInitializerError)t;
+				ExceptionInInitializerError exceptionInInitializerError = (ExceptionInInitializerError) t;
 				return exceptionInInitializerError;
 			}
 		}
@@ -327,15 +341,17 @@ public class TestSuiteGenerator {
 	}
 
 	/**
-	 * Creates a single Test Case that only loads the target class. 
-	 * <code>
+	 * Creates a single Test Case that only loads the target class. <code>
 	 * Thread currentThread = Thread.currentThread();
 	 * ClassLoader classLoader = currentThread.getClassLoader();
 	 * classLoader.load(className);
 	 * </code>
-	 * @param className the class to be loaded
+	 * 
+	 * @param className
+	 *            the class to be loaded
 	 * @return
-	 * @throws EvosuiteError if a reflection error happens while creating the test case
+	 * @throws EvosuiteError
+	 *             if a reflection error happens while creating the test case
 	 */
 	private static DefaultTestCase buildLoadTargetClassTestCase(String className) throws EvosuiteError {
 		DefaultTestCase test = new DefaultTestCase();
@@ -355,16 +371,18 @@ public class TestSuiteGenerator {
 					currentThreadVar, Collections.emptyList());
 			VariableReference contextClassLoaderVar = test.addStatement(getContextClassLoaderStmt);
 
-//			Method loadClassMethod = ClassLoader.class.getMethod("loadClass", String.class);
-//			Statement loadClassStmt = new MethodStatement(test,
-//					new GenericMethod(loadClassMethod, loadClassMethod.getDeclaringClass()), contextClassLoaderVar,
-//					Collections.singletonList(string0));
-//			test.addStatement(loadClassStmt);
+			// Method loadClassMethod = ClassLoader.class.getMethod("loadClass",
+			// String.class);
+			// Statement loadClassStmt = new MethodStatement(test,
+			// new GenericMethod(loadClassMethod, loadClassMethod.getDeclaringClass()),
+			// contextClassLoaderVar,
+			// Collections.singletonList(string0));
+			// test.addStatement(loadClassStmt);
 
 			BooleanPrimitiveStatement stmt1 = new BooleanPrimitiveStatement(test, true);
 			VariableReference boolean0 = test.addStatement(stmt1);
-			
-			Method forNameMethod = Class.class.getMethod("forName",String.class, boolean.class, ClassLoader.class);
+
+			Method forNameMethod = Class.class.getMethod("forName", String.class, boolean.class, ClassLoader.class);
 			Statement forNameStmt = new MethodStatement(test,
 					new GenericMethod(forNameMethod, forNameMethod.getDeclaringClass()), null,
 					Arrays.<VariableReference>asList(string0, boolean0, contextClassLoaderVar));
@@ -377,8 +395,8 @@ public class TestSuiteGenerator {
 	}
 
 	/**
-	 * Apply any readability optimizations and other techniques that should use
-	 * or modify the generated tests
+	 * Apply any readability optimizations and other techniques that should use or
+	 * modify the generated tests
 	 * 
 	 * @param testSuite
 	 */
@@ -388,9 +406,8 @@ public class TestSuiteGenerator {
 		// to come up with a suite without timeouts. However, they will slow
 		// down
 		// the rest of the process, and may lead to invalid tests
-		testSuite.getTestChromosomes()
-				.removeIf(t -> t.getLastExecutionResult() != null && (t.getLastExecutionResult().hasTimeout() ||
-																	  t.getLastExecutionResult().hasTestException()));
+		testSuite.getTestChromosomes().removeIf(t -> t.getLastExecutionResult() != null
+				&& (t.getLastExecutionResult().hasTimeout() || t.getLastExecutionResult().hasTestException()));
 
 		if (Properties.CTG_SEEDS_FILE_OUT != null) {
 			TestSuiteSerialization.saveTests(testSuite, new File(Properties.CTG_SEEDS_FILE_OUT));
@@ -400,10 +417,10 @@ public class TestSuiteGenerator {
 		}
 
 		/*
-		 * Remove covered goals that are not part of the minimization targets,
-		 * as they might screw up coverage analysis when a minimization timeout
-		 * occurs. This may happen e.g. when MutationSuiteFitness calls
-		 * BranchCoverageSuiteFitness which adds branch goals.
+		 * Remove covered goals that are not part of the minimization targets, as they
+		 * might screw up coverage analysis when a minimization timeout occurs. This may
+		 * happen e.g. when MutationSuiteFitness calls BranchCoverageSuiteFitness which
+		 * adds branch goals.
 		 */
 		// TODO: This creates an inconsistency between
 		// suite.getCoveredGoals().size() and suite.getNumCoveredGoals()
@@ -434,7 +451,7 @@ public class TestSuiteGenerator {
 			// progressMonitor.setCurrentPhase("Minimizing test cases");
 			if (!TimeController.getInstance().hasTimeToExecuteATestCase()) {
 				LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier()
-                        + "Skipping minimization because not enough time is left");
+						+ "Skipping minimization because not enough time is left");
 				ClientServices.track(RuntimeVariable.Result_Size, testSuite.size());
 				ClientServices.track(RuntimeVariable.Minimized_Size, testSuite.size());
 				ClientServices.track(RuntimeVariable.Result_Length, testSuite.totalLengthOfTestCases());
@@ -448,7 +465,8 @@ public class TestSuiteGenerator {
 
 				TestSuiteMinimizer minimizer = new TestSuiteMinimizer(getFitnessFactories());
 
-				LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier() + "Minimizing test suite");
+				LoggingUtils.getEvoLogger()
+						.info("* " + ClientProcess.getPrettyPrintIdentifier() + "Minimizing test suite");
 				minimizer.minimize(testSuite, true);
 
 				double after = testSuite.getFitness();
@@ -459,7 +477,7 @@ public class TestSuiteGenerator {
 		} else {
 			if (!TimeController.getInstance().hasTimeToExecuteATestCase()) {
 				LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier()
-                        + "Skipping minimization because not enough time is left");
+						+ "Skipping minimization because not enough time is left");
 			}
 
 			ClientServices.track(RuntimeVariable.Result_Size, testSuite.size());
@@ -469,6 +487,20 @@ public class TestSuiteGenerator {
 		}
 
 		if (Properties.COVERAGE) {
+			///////////////////////////// Calculate the Exception coverage and goals
+			boolean expFlag = false;
+			for (Criterion crt : Properties.CRITERION) {
+				if (crt == Criterion.EXCEPTION) {
+					expFlag = true;
+					break;
+				}
+			}
+			if (expFlag == false) {
+				ExceptionCoverageSuiteFitness branchFitness = new ExceptionCoverageSuiteFitness();
+				branchFitness.getFitness(testSuite);
+				CoverageCriteriaAnalyzer.analyzeCoverage(testSuite, Criterion.EXCEPTION);
+			}
+			////////////////////////////
 			ClientServices.getInstance().getClientNode().changeState(ClientState.COVERAGE_ANALYSIS);
 			CoverageCriteriaAnalyzer.analyzeCoverage(testSuite);
 		}
@@ -481,8 +513,8 @@ public class TestSuiteGenerator {
 		}
 
 		StatisticsSender.executedAndThenSendIndividualToMaster(testSuite);
-		LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier() + "Generated " + testSuite.size()
-                + " tests with total length " + testSuite.totalLengthOfTestCases());
+		LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier() + "Generated "
+				+ testSuite.size() + " tests with total length " + testSuite.totalLengthOfTestCases());
 
 		// TODO: In the end we will only need one analysis technique
 		if (!Properties.ANALYSIS_CRITERIA.isEmpty()) {
@@ -492,12 +524,13 @@ public class TestSuiteGenerator {
 			// FIXME: can we send all bestSuites?
 		}
 		if (Properties.CRITERION.length > 1)
-			LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier() + "Resulting test suite's coverage: "
-                    + NumberFormat.getPercentInstance().format(coverage)
-                    + " (average coverage for all fitness functions)");
+			LoggingUtils.getEvoLogger()
+					.info("* " + ClientProcess.getPrettyPrintIdentifier() + "Resulting test suite's coverage: "
+							+ NumberFormat.getPercentInstance().format(coverage)
+							+ " (average coverage for all fitness functions)");
 		else
-			LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier() + "Resulting test suite's coverage: "
-                    + NumberFormat.getPercentInstance().format(coverage));
+			LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier()
+					+ "Resulting test suite's coverage: " + NumberFormat.getPercentInstance().format(coverage));
 
 		// printBudget(ga); // TODO - need to move this somewhere else
 		if (ArrayUtil.contains(Properties.CRITERION, Criterion.DEFUSE) && Properties.ANALYSIS_CRITERIA.isEmpty())
@@ -536,7 +569,7 @@ public class TestSuiteGenerator {
 			ClientServices.getInstance().getClientNode().changeState(ClientState.ASSERTION_GENERATION);
 			if (!TimeController.getInstance().hasTimeToExecuteATestCase()) {
 				LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier()
-                        + "Skipping assertion generation because not enough time is left");
+						+ "Skipping assertion generation because not enough time is left");
 			} else {
 				TestSuiteGeneratorHelper.addAssertions(testSuite);
 			}
@@ -546,13 +579,12 @@ public class TestSuiteGenerator {
 																// testsuitechromosomes?
 		}
 
-		if(Properties.NO_RUNTIME_DEPENDENCY) {
+		if (Properties.NO_RUNTIME_DEPENDENCY) {
 			LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier()
-                    + "Property NO_RUNTIME_DEPENDENCY is set to true - skipping JUnit compile check");
-			LoggingUtils.getEvoLogger().info("* " +ClientProcess.getPrettyPrintIdentifier()
-                    + "WARNING: Not including the runtime dependencies is likely to lead to flaky tests!");
-		}
-		else if (Properties.JUNIT_TESTS && Properties.JUNIT_CHECK) {
+					+ "Property NO_RUNTIME_DEPENDENCY is set to true - skipping JUnit compile check");
+			LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier()
+					+ "WARNING: Not including the runtime dependencies is likely to lead to flaky tests!");
+		} else if (Properties.JUNIT_TESTS && Properties.JUNIT_CHECK) {
 			compileAndCheckTests(testSuite);
 		}
 
@@ -560,20 +592,21 @@ public class TestSuiteGenerator {
 			RegressionSuiteSerializer.appendToRegressionTestSuite(testSuite);
 		}
 
-		if(Properties.isRegression() && Properties.KEEP_REGRESSION_ARCHIVE){
+		if (Properties.isRegression() && Properties.KEEP_REGRESSION_ARCHIVE) {
 			RegressionSuiteSerializer.storeRegressionArchive();
 		}
 	}
 
 	/**
-	 * Compile and run the given tests. Remove from input list all tests that do
-	 * not compile, and handle the cases of instability (either remove tests or
-	 * comment out failing assertions)
+	 * Compile and run the given tests. Remove from input list all tests that do not
+	 * compile, and handle the cases of instability (either remove tests or comment
+	 * out failing assertions)
 	 *
 	 * @param chromosome
 	 */
 	private void compileAndCheckTests(TestSuiteChromosome chromosome) {
-		LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier() + "Compiling and checking tests");
+		LoggingUtils.getEvoLogger()
+				.info("* " + ClientProcess.getPrettyPrintIdentifier() + "Compiling and checking tests");
 
 		if (!JUnitAnalyzer.isJavaCompilerAvailable()) {
 			String msg = "No Java compiler is available. Make sure to run EvoSuite with the JDK and not the JRE."
@@ -622,9 +655,9 @@ public class TestSuiteGenerator {
 			}
 		}
 		/*
-		 * compiling and running each single test individually will take more
-		 * than compiling/running everything in on single suite. so it can be
-		 * used as an upper bound
+		 * compiling and running each single test individually will take more than
+		 * compiling/running everything in on single suite. so it can be used as an
+		 * upper bound
 		 */
 		long delta = java.lang.System.currentTimeMillis() - start;
 
@@ -687,9 +720,9 @@ public class TestSuiteGenerator {
 		writeObjectPool(testSuite);
 
 		/*
-		 * PUTGeneralizer generalizer = new PUTGeneralizer(); for (TestCase test
-		 * : tests) { generalizer.generalize(test); // ParameterizedTestCase put
-		 * = new ParameterizedTestCase(test); }
+		 * PUTGeneralizer generalizer = new PUTGeneralizer(); for (TestCase test :
+		 * tests) { generalizer.generalize(test); // ParameterizedTestCase put = new
+		 * ParameterizedTestCase(test); }
 		 */
 
 		return testSuite;
@@ -697,12 +730,11 @@ public class TestSuiteGenerator {
 
 	/**
 	 * <p>
-	 * If Properties.JUNIT_TESTS is set, this method writes the given test cases
-	 * to the default directory Properties.TEST_DIR.
+	 * If Properties.JUNIT_TESTS is set, this method writes the given test cases to
+	 * the default directory Properties.TEST_DIR.
 	 * 
 	 * <p>
-	 * The name of the test will be equal to the SUT followed by the given
-	 * suffix
+	 * The name of the test will be equal to the SUT followed by the given suffix
 	 * 
 	 * @param testSuite
 	 *            a test suite.
@@ -718,8 +750,8 @@ public class TestSuiteGenerator {
 			String name = Properties.TARGET_CLASS.substring(Properties.TARGET_CLASS.lastIndexOf(".") + 1);
 			String testDir = Properties.TEST_DIR;
 
-			LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier() + "Writing JUnit test case '"
-                    + (name + suffix) + "' to " + testDir);
+			LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier()
+					+ "Writing JUnit test case '" + (name + suffix) + "' to " + testDir);
 			suiteWriter.writeTestSuite(name + suffix, testDir, testSuite.getLastExecutionResults());
 		}
 		return TestGenerationResultBuilder.buildSuccessResult();
@@ -743,18 +775,18 @@ public class TestSuiteGenerator {
 		if (Properties.JUNIT_TESTS) {
 
 			TestSuiteWriter suiteWriter = new TestSuiteWriter();
-			//suiteWriter.insertTests(FailingTestSet.getFailingTests());
+			// suiteWriter.insertTests(FailingTestSet.getFailingTests());
 
 			TestSuiteChromosome suite = new TestSuiteChromosome();
-			for(TestCase test : FailingTestSet.getFailingTests()) {
+			for (TestCase test : FailingTestSet.getFailingTests()) {
 				test.setFailing();
 				suite.addTest(test);
 			}
 
 			String name = Properties.TARGET_CLASS.substring(Properties.TARGET_CLASS.lastIndexOf(".") + 1);
 			String testDir = Properties.TEST_DIR;
-			LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier() + "Writing failing test cases '"
-                    + (name + Properties.JUNIT_SUFFIX) + "' to " + testDir);
+			LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier()
+					+ "Writing failing test cases '" + (name + Properties.JUNIT_SUFFIX) + "' to " + testDir);
 			suiteWriter.insertAllTests(suite.getTests());
 			FailingTestSet.writeJUnitTestSuite(suiteWriter);
 
@@ -764,7 +796,8 @@ public class TestSuiteGenerator {
 
 	private void writeObjectPool(TestSuiteChromosome suite) {
 		if (!Properties.WRITE_POOL.isEmpty()) {
-			LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier() + "Writing sequences to pool");
+			LoggingUtils.getEvoLogger()
+					.info("* " + ClientProcess.getPrettyPrintIdentifier() + "Writing sequences to pool");
 			ObjectPool pool = ObjectPool.getPoolFromTestSuite(suite);
 			pool.writePool(Properties.WRITE_POOL);
 		}
@@ -818,8 +851,7 @@ public class TestSuiteGenerator {
 	 * getFitnessFactories
 	 * </p>
 	 * 
-	 * @return a list of {@link org.evosuite.coverage.TestFitnessFactory}
-	 *         objects.
+	 * @return a list of {@link org.evosuite.coverage.TestFitnessFactory} objects.
 	 */
 	public static List<TestFitnessFactory<? extends TestFitnessFunction>> getFitnessFactories() {
 		List<TestFitnessFactory<? extends TestFitnessFunction>> goalsFactory = new ArrayList<TestFitnessFactory<? extends TestFitnessFunction>>();

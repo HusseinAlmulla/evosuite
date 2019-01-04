@@ -664,7 +664,8 @@ public class Properties {
 	public static int BLOAT_FACTOR = 2;
 
 	@Parameter(key = "stop_zero", group = "Search Algorithm", description = "Stop optimization once goal is covered")
-	public static boolean STOP_ZERO = true;
+	//public static boolean STOP_ZERO = true;
+	public static boolean STOP_ZERO = false;
 
 	@Parameter(key = "dynamic_limit", group = "Search Algorithm", description = "Multiply search budget by number of test goals")
 	public static boolean DYNAMIC_LIMIT = false;

@@ -285,6 +285,7 @@ public class CoverageArchive<F extends TestFitnessFunction, T extends TestChromo
     // to avoid adding the same solution to 'mergedSolution' suite
     Set<T> solutionsSampledFromArchive = new LinkedHashSet<T>();
 
+
     for (F target : this.getTargets()) {
       // has target been covered? to answer it, we perform a local check rather than calling method
       // {@link TestFitnessFunction.isCoveredBy} as it may perform a fitness evaluation to access

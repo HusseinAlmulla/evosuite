@@ -123,7 +123,7 @@ public class LoggingUtils {
 	 * @return a {@link org.slf4j.Logger} object.
 	 */
 	public static Logger getEvoLogger() {
-		return LoggerFactory.getLogger(EVO_LOGGER);
+ 		return LoggerFactory.getLogger(EVO_LOGGER);
 	}
 
 	/**
