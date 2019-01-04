@@ -226,7 +226,7 @@ public class MonotonicGA<T extends Chromosome> extends GeneticAlgorithm<T> {
 
 		if (population.isEmpty()) {
 			initializePopulation();
-			assert!population.isEmpty() : "Could not create any test";
+			assert !population.isEmpty() : "Could not create any test";
 		}
 
 		logger.debug("Starting evolution");
@@ -237,19 +237,18 @@ public class MonotonicGA<T extends Chromosome> extends GeneticAlgorithm<T> {
 			bestFitness = 0.0;
 			lastBestFitness = 0.0;
 		}
-		
+
 		//////////
-		int counter=0;
+		int counter = 0;
 		RLAlgorithm rl = new RLAlgorithm();
 		//////////
-		
 
 		while (!isFinished()) {
 			////////////
 			int action = rl.getCurrent_action();
-			//Criterion[] optAction = getOneCriteria(action);
-			LoggingUtils.getEvoLogger().info( "option  "  + action);
-			//Criterion[] optAction = getOneCriteriaWithException(action);
+			// Criterion[] optAction = getOneCriteria(action);
+			LoggingUtils.getEvoLogger().info("option  " + action);
+			// Criterion[] optAction = getOneCriteriaWithException(action);
 			Criterion[] optAction = getOneCriteria(action);
 			removeFitnessFunction(optAction);
 			////////////
@@ -265,49 +264,47 @@ public class MonotonicGA<T extends Chromosome> extends GeneticAlgorithm<T> {
 				double bestFitnessAfterEvolution = getBestFitness();
 
 				if (getFitnessFunction().isMaximizationFunction())
-					assert(bestFitnessAfterEvolution >= (bestFitnessBeforeEvolution
-							- DELTA)) : "best fitness before evolve()/sortPopulation() was: " + bestFitnessBeforeEvolution
-									+ ", now best fitness is " + bestFitnessAfterEvolution;
+					assert (bestFitnessAfterEvolution >= (bestFitnessBeforeEvolution
+							- DELTA)) : "best fitness before evolve()/sortPopulation() was: "
+									+ bestFitnessBeforeEvolution + ", now best fitness is " + bestFitnessAfterEvolution;
 				else
-					assert(bestFitnessAfterEvolution <= (bestFitnessBeforeEvolution
-							+ DELTA)) : "best fitness before evolve()/sortPopulation() was: " + bestFitnessBeforeEvolution
-									+ ", now best fitness is " + bestFitnessAfterEvolution;
+					assert (bestFitnessAfterEvolution <= (bestFitnessBeforeEvolution
+							+ DELTA)) : "best fitness before evolve()/sortPopulation() was: "
+									+ bestFitnessBeforeEvolution + ", now best fitness is " + bestFitnessAfterEvolution;
 			}
-			
-			
+
 			{
 				double bestFitnessBeforeLocalSearch = getBestFitness();
 				applyLocalSearch();
 				double bestFitnessAfterLocalSearch = getBestFitness();
 
 				if (getFitnessFunction().isMaximizationFunction())
-					assert(bestFitnessAfterLocalSearch >= (bestFitnessBeforeLocalSearch
+					assert (bestFitnessAfterLocalSearch >= (bestFitnessBeforeLocalSearch
 							- DELTA)) : "best fitness before applyLocalSearch() was: " + bestFitnessBeforeLocalSearch
 									+ ", now best fitness is " + bestFitnessAfterLocalSearch;
 				else
-					assert(bestFitnessAfterLocalSearch <= (bestFitnessBeforeLocalSearch
+					assert (bestFitnessAfterLocalSearch <= (bestFitnessBeforeLocalSearch
 							+ DELTA)) : "best fitness before applyLocalSearch() was: " + bestFitnessBeforeLocalSearch
 									+ ", now best fitness is " + bestFitnessAfterLocalSearch;
 			}
 
 			/*
-			 * TODO: before explanation: due to static state handling, LS can
-			 * worse individuals. so, need to re-sort.
+			 * TODO: before explanation: due to static state handling, LS can worse
+			 * individuals. so, need to re-sort.
 			 * 
-			 * now: the system tests that were failing have no static state...
-			 * so re-sorting does just hide the problem away, and reduce
-			 * performance (likely significantly). it is definitively a bug
-			 * somewhere...
+			 * now: the system tests that were failing have no static state... so re-sorting
+			 * does just hide the problem away, and reduce performance (likely
+			 * significantly). it is definitively a bug somewhere...
 			 */
 			// sortPopulation();
 
 			double newFitness = getBestFitness();
-			
+
 			if (getFitnessFunction().isMaximizationFunction())
-				assert(newFitness >= (bestFitness - DELTA)) : "best fitness was: " + bestFitness
+				assert (newFitness >= (bestFitness - DELTA)) : "best fitness was: " + bestFitness
 						+ ", now best fitness is " + newFitness;
 			else
-				assert(newFitness <= (bestFitness + DELTA)) : "best fitness was: " + bestFitness
+				assert (newFitness <= (bestFitness + DELTA)) : "best fitness was: " + bestFitness
 						+ ", now best fitness is " + newFitness;
 			bestFitness = newFitness;
 
@@ -327,65 +324,69 @@ public class MonotonicGA<T extends Chromosome> extends GeneticAlgorithm<T> {
 			logger.info("Population size: " + population.size());
 			logger.info("Best individual has fitness: " + population.get(0).getFitness());
 			logger.info("Worst individual has fitness: " + population.get(population.size() - 1).getFitness());
-			
-			
+
 			/////////////////////////
-			
-			
-			TestSuiteChromosome testSuite = (TestSuiteChromosome) this.getBestIndividual();	
+
+			TestSuiteChromosome testSuite = (TestSuiteChromosome) this.getBestIndividual();
 			ExceptionCoverageSuiteFitness exceptionSuite = new ExceptionCoverageSuiteFitness();
+			// changing the criteria to Exception so archive will deal with TestSuite as the Exception is the goal.
 			Criterion[] tmp = Properties.CRITERION;
-			Properties.CRITERION = new Criterion[] {Criterion.EXCEPTION};
+			Properties.CRITERION = new Criterion[] { Criterion.EXCEPTION };
 			double fitness = exceptionSuite.getFitness(testSuite);
 			int[] reward_score = CoverageCriteriaAnalyzer.analyzeCoverageNew(testSuite, Criterion.EXCEPTION);
-		//	int[] reward_score1 = CoverageCriteriaAnalyzer.analyzeCoverageNew(testSuite, Criterion.BRANCH);
-		//	int re0 = reward_score[0] + reward_score1[0];
-		//	int re1 = reward_score[1] + reward_score1[1];
+			// int[] reward_score1 = CoverageCriteriaAnalyzer.analyzeCoverageNew(testSuite,
+			// Criterion.BRANCH);
+			// int re0 = reward_score[0] + reward_score1[0];
+			// int re1 = reward_score[1] + reward_score1[1];
 
 			Properties.CRITERION = tmp;
-			LoggingUtils.getEvoLogger().info(" goals_found " + reward_score[0] +" covered " + reward_score[1]);
-			rl.DSGSarsa_part2(counter, testSuite.getCoverage(), testSuite.size(), reward_score[1]/*testSuite.getNumOfCoveredGoals()*/, testSuite.getFitness(),reward_score[0], reward_score[0]+reward_score[1]);
-			
-		//	LoggingUtils.getEvoLogger().info(" goals_found " + re0 +" covered " + re1);
-		//	rl.DSGSarsa_part2(counter, testSuite.getCoverage(), testSuite.size(), re1, testSuite.getFitness(),re0, re0);
-			
+			LoggingUtils.getEvoLogger().info(" goals_found " + reward_score[0] + " covered " + reward_score[1]);
+			rl.DSGSarsa_part2(counter, testSuite.getCoverage(), testSuite.size(),
+					reward_score[1]/* testSuite.getNumOfCoveredGoals() */, testSuite.getFitness(), reward_score[0],
+					reward_score[0] + reward_score[1]);
+
+			// LoggingUtils.getEvoLogger().info(" goals_found " + re0 +" covered " + re1);
+			// rl.DSGSarsa_part2(counter, testSuite.getCoverage(), testSuite.size(), re1,
+			// testSuite.getFitness(),re0, re0);
+
 			counter++;
 			LoggingUtils.getEvoLogger().info("Counter  :  " + counter);
 			updateBestIndividualFromArchive();
 			////////////////////////
 
 		}
-		
-		
+
 		////////////////////////////
 		rl.prt();
 		LoggingUtils.getEvoLogger().info("Last action " + rl.getCurrent_action());
 		TestSuiteChromosome testSuite = (TestSuiteChromosome) this.getBestIndividual();
+		// changing the criteria to Exception so archive will deal with TestSuite as the Exception is the goal.
+		
 		Criterion[] tmp = Properties.CRITERION;
-		Properties.CRITERION = new Criterion[] {Criterion.EXCEPTION};
-		int[] reward_score = CoverageCriteriaAnalyzer.analyzeCoverageNew(testSuite, Criterion.EXCEPTION);	
-		LoggingUtils.getEvoLogger().info(" goals_found " + reward_score[0] +" covered " + reward_score[1]);
+		Properties.CRITERION = new Criterion[] { Criterion.EXCEPTION };
+		int[] reward_score = CoverageCriteriaAnalyzer.analyzeCoverageNew(testSuite, Criterion.EXCEPTION);
+		LoggingUtils.getEvoLogger().info(" goals_found " + reward_score[0] + " covered " + reward_score[1]);
 		Properties.CRITERION = tmp;
-		LoggingUtils.getEvoLogger().info("  First one "  + testSuite.getCoverage() +  "  " + testSuite.size() +  "  " + testSuite.getNumOfCoveredGoals() +  "  " + testSuite.getFitness());
-		int finalAction = rl.DSGSarsa_FinalEstimation(testSuite.getCoverage(), testSuite.size(), testSuite.getNumOfCoveredGoals(),
-				reward_score[1], reward_score[1]);
+		LoggingUtils.getEvoLogger().info("  First one " + testSuite.getCoverage() + "  " + testSuite.size() + "  "
+				+ testSuite.getNumOfCoveredGoals() + "  " + testSuite.getFitness());
+		int finalAction = rl.DSGSarsa_FinalEstimation(testSuite.getCoverage(), testSuite.size(),
+				testSuite.getNumOfCoveredGoals(), reward_score[1], reward_score[1]);
 		LoggingUtils.getEvoLogger().info("current " + finalAction);
-		//Criterion[] optAction = getOneCriteria(finalAction);
-		Criterion[] optAction = new Criterion[] {Criterion.EXCEPTION,Criterion.BRANCH};
-		//Criterion[] optAction = getOneCriteriaWithException(finalAction);
+		// Criterion[] optAction = getOneCriteria(finalAction);
+		Criterion[] optAction = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH };
+		// Criterion[] optAction = getOneCriteriaWithException(finalAction);
 		removeFitnessFunction(optAction);
 		updateBestIndividualFromArchive();
-		
+
 		String finalCriteria = "";
-		for(Criterion crt:  optAction) {
-			if(finalCriteria != "")
+		for (Criterion crt : optAction) {
+			if (finalCriteria != "")
 				finalCriteria += ":";
 			finalCriteria += crt.toString();
 		}
 		LoggingUtils.getEvoLogger().info("BestOption_ " + finalCriteria);
 		////////////////////////////
-		
-		
+
 		// archive
 		TimeController.execute(this::updateBestIndividualFromArchive, "update from archive", 5_000);
 

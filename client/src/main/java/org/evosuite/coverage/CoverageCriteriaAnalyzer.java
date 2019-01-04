@@ -375,8 +375,8 @@ public class CoverageCriteriaAnalyzer {
 
     	}
     	//return coverage_score;
-    	//int[] ret = {goals.size(),covered};
-    	int[] ret = {(int)(100*coverage_score),(int)(100*coverage_score)};
+    	int[] ret = {goals.size(),covered};
+    	//int[] ret = {(int)(100*coverage_score),(int)(100*coverage_score)};
     	return ret;        
     }
 

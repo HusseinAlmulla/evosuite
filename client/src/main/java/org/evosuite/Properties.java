@@ -665,6 +665,9 @@ public class Properties {
 
 	@Parameter(key = "stop_zero", group = "Search Algorithm", description = "Stop optimization once goal is covered")
 	//public static boolean STOP_ZERO = true;
+	
+	/*Disable the stopping condition STOP_ZERO to let the optimization
+	keep going if it face combination that give 0 fitness value but not covered the exception goals.*/
 	public static boolean STOP_ZERO = false;
 
 	@Parameter(key = "dynamic_limit", group = "Search Algorithm", description = "Multiply search budget by number of test goals")

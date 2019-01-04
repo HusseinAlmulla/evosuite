@@ -274,6 +274,8 @@ public abstract class Chromosome implements Comparable<Chromosome>, Serializable
 	 * compareSecondaryObjective(c); } else return i; }
 	 */
 	///////////////////////////////////
+	/* changing the function to make comparison based on the number of discovered and covered Exception*/
+	
 	@Override
 	public int compareTo(Chromosome c) {
 		/*
@@ -290,7 +292,7 @@ public abstract class Chromosome implements Comparable<Chromosome>, Serializable
 	}
 
 	public static int[] analyzeCoverageNew(Chromosome c) {
-		
+		// changing the criteria to Exception so archive will deal with TestSuite as the Exception is the goal.
 		Criterion[] tmp = Properties.CRITERION;
 		Properties.CRITERION = new Criterion[] {Criterion.EXCEPTION};
 		
