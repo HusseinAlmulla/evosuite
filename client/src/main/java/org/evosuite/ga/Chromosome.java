@@ -268,36 +268,49 @@ public abstract class Chromosome implements Comparable<Chromosome>, Serializable
 	 * fitness values are equal, go through all secondary objectives and try to find
 	 * one where the two are not equal.
 	 */
-	/*
-	 * @Override public int compareTo(Chromosome c) { int i = (int)
-	 * Math.signum(this.getFitness() - c.getFitness()); if (i == 0) { return
-	 * compareSecondaryObjective(c); } else return i; }
-	 */
-	///////////////////////////////////
-	/* changing the function to make comparison based on the number of discovered and covered Exception*/
-	
+
 	@Override
 	public int compareTo(Chromosome c) {
-		/*
-		 * if (c instanceof TestChromosome) { int i = (int)
-		 * Math.signum(this.getFitness() - c.getFitness()); if (i == 0){ return
-		 * compareSecondaryObjective(c); }else return i; } else {
-		 */
-
-		int[] GoalThis = analyzeCoverageNew(this);
-		int[] GoalC = analyzeCoverageNew(c);
-		int i = (int) (-1 * (Math.signum((GoalThis[0] + GoalThis[1]) - (GoalC[0] + GoalC[1]))));
-		return i;
-		// }
+		int i = (int) Math.signum(this.getFitness() - c.getFitness());
+		if (i == 0) {
+			return compareSecondaryObjective(c);
+		} else
+			return i;
 	}
 
+	///////////////////////////////////
+	/*
+	 * changing the function to make comparison based on the number of discovered
+	 * and covered Exception
+	 */
+
+	// @Override
+	// public int compareTo(Chromosome c) {
+	//
+	//// if (c instanceof TestChromosome) {
+	//// int i = (int)
+	////
+	//// Math.signum(this.getFitness() - c.getFitness()); if (i == 0){ return
+	//// compareSecondaryObjective(c); }else return i;
+	//// } else {
+	////
+	// int[] GoalThis = analyzeCoverageNew(this);
+	// int[] GoalC = analyzeCoverageNew(c);
+	//// int i = (int) (-1 * (Math.signum((GoalThis[0] + GoalThis[1]) - (GoalC[0] +
+	// GoalC[1]))));
+	// int i = (int) (-1 * (Math.signum(GoalThis[0] - GoalC[0] )));
+	// return i;
+	//// }
+	// }
+
 	public static int[] analyzeCoverageNew(Chromosome c) {
-		// changing the criteria to Exception so archive will deal with TestSuite as the Exception is the goal.
-		Criterion[] tmp = Properties.CRITERION;
-		Properties.CRITERION = new Criterion[] {Criterion.EXCEPTION};
-		
+		// changing the criteria to Exception so archive will deal with TestSuite as the
+		// Exception is the goal.
+		// Criterion[] tmp = Properties.CRITERION;
+		// Properties.CRITERION = new Criterion[] {Criterion.EXCEPTION};
+
 		TestSuiteChromosome testSuiteCopy = (TestSuiteChromosome) ((Chromosome) c.clone());
-		TestFitnessFactory factory = FitnessFunctions.getFitnessFactory(Criterion.EXCEPTION);
+		TestFitnessFactory factory = FitnessFunctions.getFitnessFactory(Criterion.BRANCH);
 		List<TestFitnessFunction> goals = factory.getCoverageGoals();
 		Collections.sort(goals);
 		int covered = 0;
@@ -308,7 +321,7 @@ public abstract class Chromosome implements Comparable<Chromosome>, Serializable
 			}
 		}
 		int[] ret = { goals.size(), covered };
-		Properties.CRITERION = tmp;
+		// Properties.CRITERION = tmp;
 		return ret;
 	}
 

@@ -15,6 +15,7 @@ public class ValueFunction {
 	IHT hashTable;
 	private double[] weights;
 	
+	private static int numOfOption = 0;
 	public ValueFunction(int nOfT, double al, double be) {
 		numOfTilings = nOfT;
 		int maxSize = 4096;
@@ -23,6 +24,7 @@ public class ValueFunction {
         averageReward = 0.0;
         alpha = al / numOfTilings;
         beta = be;		
+        numOfOption = org.evosuite.ga.metaheuristics.MonotonicGA.numberOfOption;
 	}
 	
 	public ArrayList<Integer> getActiveTiles(double[] floats, int action) { // coverage, int size, int NumOfCoveredGoals,double fitness
@@ -46,9 +48,9 @@ public class ValueFunction {
 	}
 	
 	public double[] stateValue(double coverage, int size, int numOfCoveredGoal, double fitness, int newFoundGoals) {
-		double[] values = new double[92];
+		double[] values = new double[numOfOption];
 		int max = 0;
-		for(int i=0; i<92; i++) {
+		for(int i=0; i<numOfOption; i++) {
 			int action = i;
 			values[i] = value(coverage, size, numOfCoveredGoal, fitness, newFoundGoals, action);
 			//LoggingUtils.getEvoLogger().info("i "  + i + " " + values[i]);
@@ -60,8 +62,6 @@ public class ValueFunction {
 		double[] val = {values[max],max};
 		return val;
 	}
-	
-		
 	
 	
 	public void learn(double coverage, int size, int numOfCoveredGoal, double fitness, int FoundGoals, int action
@@ -100,9 +100,9 @@ public class ValueFunction {
 	}
 		
 		public double[] printStatesValues(double coverage, int size, int numOfCoveredGoal, double fitness, int newFoundGoals) {
-			double[] values = new double[81];
+			double[] values = new double[numOfOption];
 			int max = 0;
-			for(int i=0; i<81; i++) {
+			for(int i=0; i<numOfOption; i++) {
 				int action = i;
 				values[i] = value(coverage, size, numOfCoveredGoal, fitness, newFoundGoals, action);
 				LoggingUtils.getEvoLogger().info("i "  + i + " " + values[i]);

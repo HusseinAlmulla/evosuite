@@ -467,7 +467,7 @@ public class TestSuiteGenerator {
 
 				LoggingUtils.getEvoLogger()
 						.info("* " + ClientProcess.getPrettyPrintIdentifier() + "Minimizing test suite");
-				minimizer.minimize(testSuite, true);
+				//minimizer.minimize(testSuite, true);
 
 				double after = testSuite.getFitness();
 				if (after > before + 0.01d) { // assume minimization
@@ -496,9 +496,9 @@ public class TestSuiteGenerator {
 				}
 			}
 			if (expFlag == false) {
-				ExceptionCoverageSuiteFitness branchFitness = new ExceptionCoverageSuiteFitness();
-				branchFitness.getFitness(testSuite);
-				CoverageCriteriaAnalyzer.analyzeCoverage(testSuite, Criterion.EXCEPTION);
+//				ExceptionCoverageSuiteFitness branchFitness = new ExceptionCoverageSuiteFitness();
+//				branchFitness.getFitness(testSuite);
+				CoverageCriteriaAnalyzer.analyzeCoverage(testSuite, Criterion.BRANCH);
 			}
 			////////////////////////////
 			ClientServices.getInstance().getClientNode().changeState(ClientState.COVERAGE_ANALYSIS);

@@ -89,8 +89,8 @@ public class MonotonicGA<T extends Chromosome> extends GeneticAlgorithm<T> {
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void evolve() {
-		List<T> newGeneration = new ArrayList<T>();
-
+		// List<T> newGeneration = new ArrayList<T>();
+		ArrayList<T> newGeneration = new ArrayList<T>();
 		// Elitism
 		logger.debug("Elitism");
 		newGeneration.addAll(elitism());
@@ -240,17 +240,37 @@ public class MonotonicGA<T extends Chromosome> extends GeneticAlgorithm<T> {
 
 		//////////
 		int counter = 0;
-		RLAlgorithm rl = new RLAlgorithm();
+		int gen = 0;
+		RLAlgorithm rl = new RLAlgorithm(numberOfOption);
+		int action = -1;
+		int previous_action = -2;
 		//////////
 
 		while (!isFinished()) {
 			////////////
-			int action = rl.getCurrent_action();
-			// Criterion[] optAction = getOneCriteria(action);
-			LoggingUtils.getEvoLogger().info("option  " + action);
-			// Criterion[] optAction = getOneCriteriaWithException(action);
-			Criterion[] optAction = getOneCriteria(action);
-			removeFitnessFunction(optAction);
+
+			if (gen % 3 == 0) {
+//				 action = rl.UCB_part1(counter);
+				action = rl.getCurrent_action();
+//				 action = rl.TS_part1();
+
+				LoggingUtils.getEvoLogger().info("option  " + action);
+				//
+				// Criterion[] optAction = getOneCriteria(action);
+				Criterion[] optAction = getOneCriteriaWithException(action);
+//				 Criterion[] optAction = getOneCriteria(action);
+
+				if (counter > numberOfOption) {
+					// if (action != previous_action) {
+					updateFitnessFunction(optAction, action);
+					// }
+				} else {
+					removeFitnessFunction(optAction);
+				}
+				// previous_action = action;
+				// }
+			}
+
 			////////////
 			logger.info("Population size before: " + population.size());
 			// related to Properties.ENABLE_SECONDARY_OBJECTIVE_AFTER;
@@ -327,64 +347,94 @@ public class MonotonicGA<T extends Chromosome> extends GeneticAlgorithm<T> {
 
 			/////////////////////////
 
-			TestSuiteChromosome testSuite = (TestSuiteChromosome) this.getBestIndividual();
-			ExceptionCoverageSuiteFitness exceptionSuite = new ExceptionCoverageSuiteFitness();
-			// changing the criteria to Exception so archive will deal with TestSuite as the Exception is the goal.
-			Criterion[] tmp = Properties.CRITERION;
-			Properties.CRITERION = new Criterion[] { Criterion.EXCEPTION };
-			double fitness = exceptionSuite.getFitness(testSuite);
-			int[] reward_score = CoverageCriteriaAnalyzer.analyzeCoverageNew(testSuite, Criterion.EXCEPTION);
-			// int[] reward_score1 = CoverageCriteriaAnalyzer.analyzeCoverageNew(testSuite,
-			// Criterion.BRANCH);
-			// int re0 = reward_score[0] + reward_score1[0];
-			// int re1 = reward_score[1] + reward_score1[1];
+			if (gen % 3 == 0) {
+				TestSuiteChromosome testSuite = (TestSuiteChromosome) this.getBestIndividual();
+				this.setPopulation(action);
 
-			Properties.CRITERION = tmp;
-			LoggingUtils.getEvoLogger().info(" goals_found " + reward_score[0] + " covered " + reward_score[1]);
-			rl.DSGSarsa_part2(counter, testSuite.getCoverage(), testSuite.size(),
-					reward_score[1]/* testSuite.getNumOfCoveredGoals() */, testSuite.getFitness(), reward_score[0],
-					reward_score[0] + reward_score[1]);
+				// ExceptionCoverageSuiteFitness exceptionSuite = new
+				// ExceptionCoverageSuiteFitness();
+				// changing the criteria to Exception so archive will deal with TestSuite as the
+				// Exception is the goal.
+				// Criterion[] tmp = Properties.CRITERION;
+				// Properties.CRITERION = new Criterion[] { Criterion.EXCEPTION };
+				// double fitness = exceptionSuite.getFitness(testSuite);
+				int[] reward_score = CoverageCriteriaAnalyzer.analyzeCoverageNew(testSuite, Criterion.EXCEPTION);
 
-			// LoggingUtils.getEvoLogger().info(" goals_found " + re0 +" covered " + re1);
-			// rl.DSGSarsa_part2(counter, testSuite.getCoverage(), testSuite.size(), re1,
-			// testSuite.getFitness(),re0, re0);
+				// int[] reward_score1 = CoverageCriteriaAnalyzer.analyzeCoverageNew(testSuite,
+				// Criterion.BRANCH);
+				// int re0 = reward_score[0] + reward_score1[0];
+				// int re1 = reward_score[1] + reward_score1[1];
 
-			counter++;
-			LoggingUtils.getEvoLogger().info("Counter  :  " + counter);
-			updateBestIndividualFromArchive();
+				LoggingUtils.getEvoLogger().info(" goals_found " + reward_score[0] + " covered " + reward_score[1]);
+
+				rl.DSGSarsa_part2(counter, testSuite.getCoverage(), testSuite.size(), reward_score[1],
+						testSuite.getFitness(), reward_score[0], reward_score[0] + reward_score[1]);
+
+//				 rl.UCB_part2(reward_score[0] + reward_score[1], action);
+
+//				 rl.TS_part2(counter, action, reward_score[1]);
+				// LoggingUtils.getEvoLogger().info(" goals_found " + re0 +" covered " + re1);
+				// rl.DSGSarsa_part2(counter, testSuite.getCoverage(), testSuite.size(), re1,
+				// testSuite.getFitness(),re0, re0);
+
+				LoggingUtils.getEvoLogger().info("Counter  :  " + counter);
+				// updateBestIndividualFromArchive();
+				// Properties.CRITERION = tmp;
+				counter++;
+			}
+			gen++;
 			////////////////////////
 
 		}
 
 		////////////////////////////
 		rl.prt();
-		LoggingUtils.getEvoLogger().info("Last action " + rl.getCurrent_action());
-		TestSuiteChromosome testSuite = (TestSuiteChromosome) this.getBestIndividual();
-		// changing the criteria to Exception so archive will deal with TestSuite as the Exception is the goal.
-		
-		Criterion[] tmp = Properties.CRITERION;
-		Properties.CRITERION = new Criterion[] { Criterion.EXCEPTION };
-		int[] reward_score = CoverageCriteriaAnalyzer.analyzeCoverageNew(testSuite, Criterion.EXCEPTION);
-		LoggingUtils.getEvoLogger().info(" goals_found " + reward_score[0] + " covered " + reward_score[1]);
-		Properties.CRITERION = tmp;
-		LoggingUtils.getEvoLogger().info("  First one " + testSuite.getCoverage() + "  " + testSuite.size() + "  "
-				+ testSuite.getNumOfCoveredGoals() + "  " + testSuite.getFitness());
-		int finalAction = rl.DSGSarsa_FinalEstimation(testSuite.getCoverage(), testSuite.size(),
-				testSuite.getNumOfCoveredGoals(), reward_score[1], reward_score[1]);
-		LoggingUtils.getEvoLogger().info("current " + finalAction);
+		// LoggingUtils.getEvoLogger().info("Last action " + rl.getCurrent_action());
+		// TestSuiteChromosome testSuite = (TestSuiteChromosome)
+		// this.getBestIndividual();
+		// // changing the criteria to Exception so archive will deal with TestSuite as
+		// the
+		// // Exception is the goal.
+		//
+		// Criterion[] tmp = Properties.CRITERION;
+		// Properties.CRITERION = new Criterion[] { Criterion.EXCEPTION };
+		// int[] reward_score = CoverageCriteriaAnalyzer.analyzeCoverageNew(testSuite,
+		// Criterion.EXCEPTION);
+		// LoggingUtils.getEvoLogger().info(" goals_found " + reward_score[0] + "
+		// covered " + reward_score[1]);
+		// Properties.CRITERION = tmp;
+		// LoggingUtils.getEvoLogger().info(" First one " + testSuite.getCoverage() + "
+		// " + testSuite.size() + " "
+		// + testSuite.getNumOfCoveredGoals() + " " + testSuite.getFitness());
+		//
+		// int finalAction = rl.DSGSarsa_FinalEstimation(testSuite.getCoverage(),
+		// testSuite.size(),
+		// testSuite.getNumOfCoveredGoals(), reward_score[0], reward_score[1]);
+		//
+		// LoggingUtils.getEvoLogger().info("current " + finalAction);
+		// action = rl.UCB_part1(counter);
+		// LoggingUtils.getEvoLogger().info("current " + action);
+		Criterion[] optAction = new Criterion[] { Criterion.EXCEPTION, }; // Criterion[]
+		// optAction = getOneCriteriaWithException(finalAction);
 		// Criterion[] optAction = getOneCriteria(finalAction);
-		Criterion[] optAction = new Criterion[] { Criterion.EXCEPTION, Criterion.BRANCH };
-		// Criterion[] optAction = getOneCriteriaWithException(finalAction);
+
 		removeFitnessFunction(optAction);
 		updateBestIndividualFromArchive();
 
-		String finalCriteria = "";
-		for (Criterion crt : optAction) {
-			if (finalCriteria != "")
-				finalCriteria += ":";
-			finalCriteria += crt.toString();
-		}
-		LoggingUtils.getEvoLogger().info("BestOption_ " + finalCriteria);
+		/*
+		 * int max = 0; double sumR[] = RLAlgorithm.getSums_of_rewards(); for (int i =
+		 * 0; i < sumR.length; i++) { if (sumR[i] > sumR[max]) { max = i; } }
+		 * 
+		 * removeFitnessFunction(getOneCriteria(max));
+		 * removeFitnessFunction(getOneCriteriaWithException(max));
+		 * updateBestIndividualFromArchive();
+		 */
+		/*
+		 * String finalCriteria = ""; for (Criterion crt : getOneCriteria(max)) { if
+		 * (finalCriteria != "") finalCriteria += ":"; finalCriteria += crt.toString();
+		 * }
+		 */
+		// LoggingUtils.getEvoLogger().info("BestOption_ " + finalCriteria);
 		////////////////////////////
 
 		// archive
