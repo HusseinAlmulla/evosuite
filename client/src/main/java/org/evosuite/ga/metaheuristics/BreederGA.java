@@ -87,7 +87,7 @@ public class BreederGA<T extends Chromosome> extends StandardGA<T> {
             }
         }
 
-        population = newGeneration;
+        population = (ArrayList<T>) newGeneration;
         //archive
         updateFitnessFunctionsAndValues();
         //

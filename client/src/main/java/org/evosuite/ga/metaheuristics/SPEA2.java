@@ -165,7 +165,7 @@ public class SPEA2<T extends Chromosome> extends GeneticAlgorithm<T> {
 
     // replace population object with archive, so that when 'getBestIndividuals()'
     // function is called, the correct list of solutions is returned
-    this.population = this.archive;
+    this.population = (ArrayList<T>) this.archive;
 
     this.notifySearchFinished();
   }

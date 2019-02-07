@@ -161,7 +161,7 @@ public class LIPS <T extends Chromosome> extends GeneticAlgorithm<T>{
 		}
 
 		population.clear();
-		population = newGeneration;
+		population = (ArrayList<T>) newGeneration;
 
 		// calculate fitness for all test cases in the current (new) population
 		calculateFitness();

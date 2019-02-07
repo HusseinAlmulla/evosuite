@@ -55,7 +55,7 @@ public class StandardGA<T extends Chromosome> extends GeneticAlgorithm<T> {
 	@Override
 	protected void evolve() {
 
-		List<T> newGeneration = new ArrayList<T>();
+		ArrayList<T> newGeneration = new ArrayList<T>();
 
 		// Elitism
 		newGeneration.addAll(elitism());

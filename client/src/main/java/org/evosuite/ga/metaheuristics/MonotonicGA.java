@@ -250,25 +250,24 @@ public class MonotonicGA<T extends Chromosome> extends GeneticAlgorithm<T> {
 			////////////
 
 			if (gen % 3 == 0) {
-//				 action = rl.UCB_part1(counter);
-				action = rl.getCurrent_action();
-//				 action = rl.TS_part1();
+				action = rl.UCB_part1(counter);
+				// action = rl.getCurrent_action();
+				// action = rl.TS_part1();
 
 				LoggingUtils.getEvoLogger().info("option  " + action);
 				//
 				// Criterion[] optAction = getOneCriteria(action);
 				Criterion[] optAction = getOneCriteriaWithException(action);
-//				 Criterion[] optAction = getOneCriteria(action);
+				// Criterion[] optAction = getOneCriteria(action);
+				if (action != previous_action) {
+					if (counter > numberOfOption) {
+						updateFitnessFunction(optAction, action);
 
-				if (counter > numberOfOption) {
-					// if (action != previous_action) {
-					updateFitnessFunction(optAction, action);
-					// }
-				} else {
-					removeFitnessFunction(optAction);
+					} else {
+						removeFitnessFunction(optAction);
+					}
+					previous_action = action;
 				}
-				// previous_action = action;
-				// }
 			}
 
 			////////////
@@ -365,19 +364,21 @@ public class MonotonicGA<T extends Chromosome> extends GeneticAlgorithm<T> {
 				// int re0 = reward_score[0] + reward_score1[0];
 				// int re1 = reward_score[1] + reward_score1[1];
 
-				LoggingUtils.getEvoLogger().info(" goals_found " + reward_score[0] + " covered " + reward_score[1]);
+				LoggingUtils.getEvoLogger()
+						.info("option  " + action + "  goals_found " + reward_score[0] + " covered " + reward_score[1]);
 
-				rl.DSGSarsa_part2(counter, testSuite.getCoverage(), testSuite.size(), reward_score[1],
-						testSuite.getFitness(), reward_score[0], reward_score[0] + reward_score[1]);
+				// rl.DSGSarsa_part2(counter, testSuite.getCoverage(), testSuite.size(),
+				// reward_score[1],
+				// testSuite.getFitness(), reward_score[0], reward_score[0] + reward_score[1]);
 
-//				 rl.UCB_part2(reward_score[0] + reward_score[1], action);
+				rl.UCB_part2(reward_score[0] + reward_score[1], action);
 
-//				 rl.TS_part2(counter, action, reward_score[1]);
+				// rl.TS_part2(counter, action, reward_score[0] + reward_score[1]);
 				// LoggingUtils.getEvoLogger().info(" goals_found " + re0 +" covered " + re1);
 				// rl.DSGSarsa_part2(counter, testSuite.getCoverage(), testSuite.size(), re1,
 				// testSuite.getFitness(),re0, re0);
 
-				LoggingUtils.getEvoLogger().info("Counter  :  " + counter);
+				// LoggingUtils.getEvoLogger().info("Counter : " + counter);
 				// updateBestIndividualFromArchive();
 				// Properties.CRITERION = tmp;
 				counter++;

@@ -162,8 +162,8 @@ public class RLAlgorithm {
 			sigma[ad] = 1;
 		} else {
 			int ns = numbers_of_selections[ad];
-			// sigma[ad] = ((ns - 1) * sigma[ad] + (reward_score - newMeanTotal) *
-			// (reward_score - mu[ad])) / ns;
+			 sigma[ad] = ((ns - 1) * sigma[ad] + (reward_score - newMeanTotal) *
+			 (reward_score - mu[ad])) / ns;
 
 			mu[ad] = ((mu[ad] * varTotal) + (reward_score * sigma[ad])) / (varTotal + sigma[ad]);
 			s[ad] = (s[ad] * varTotal) / (s[ad] * varTotal);
@@ -217,7 +217,7 @@ public class RLAlgorithm {
 			if (numbers_of_selections[ind] > 0) {
 				double average_reward = sums_of_rewards[ind] / (double) numbers_of_selections[ind];
 				// 10 is the best for the c
-				double delta_j = ((double) 1 / 10)
+				double delta_j = ((double) 1 / 40)
 						* (Math.sqrt(Math.log((double) (counter)) / (double) numbers_of_selections[ind]));
 				// double delta_j = (((double) 1/5)
 				// * Math.sqrt(Math.log((double) (counter)) / (double)

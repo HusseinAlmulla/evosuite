@@ -498,7 +498,7 @@ public class TestSuiteGenerator {
 			if (expFlag == false) {
 //				ExceptionCoverageSuiteFitness branchFitness = new ExceptionCoverageSuiteFitness();
 //				branchFitness.getFitness(testSuite);
-				CoverageCriteriaAnalyzer.analyzeCoverage(testSuite, Criterion.BRANCH);
+				CoverageCriteriaAnalyzer.analyzeCoverage(testSuite, Criterion.EXCEPTION);
 			}
 			////////////////////////////
 			ClientServices.getInstance().getClientNode().changeState(ClientState.COVERAGE_ANALYSIS);

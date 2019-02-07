@@ -121,7 +121,7 @@ public class NoveltySearch<T extends Chromosome> extends GeneticAlgorithm<T>  {
                 newGeneration.add(parent2);
         }
 
-        population = newGeneration;
+        population = (ArrayList<T>) newGeneration;
         //archive
         updateFitnessFunctionsAndValues();
         //

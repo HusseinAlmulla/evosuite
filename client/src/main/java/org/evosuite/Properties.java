@@ -592,7 +592,7 @@ public class Properties {
 
 
 	@Parameter(key = "stopping_condition", group = "Search Algorithm", description = "What condition should be checked to end the search")
-	public static StoppingCondition STOPPING_CONDITION = StoppingCondition.MAXTIME;
+	public static StoppingCondition STOPPING_CONDITION = StoppingCondition.MAXTIME;//MAXGENERATIONS;
 
 	public enum CrossoverFunction {
 		SINGLEPOINTRELATIVE, SINGLEPOINTFIXED, SINGLEPOINT, COVERAGE, UNIFORM
@@ -675,7 +675,7 @@ public class Properties {
 
 	@Parameter(key = "global_timeout", group = "Search Algorithm", description = "Maximum seconds allowed for entire search when not using time as stopping criterion")
 	@IntValue(min = 0)
-	public static int GLOBAL_TIMEOUT = 120;
+	public static int GLOBAL_TIMEOUT = 120000; // was 120 change to make the run based on the number of generation
 
 	@Parameter(key = "minimization_timeout", group = "Search Algorithm", description = "Seconds allowed for minimization at the end")
 	@IntValue(min = 0)
@@ -1533,6 +1533,7 @@ public class Properties {
 	}
 
 	@Parameter(key = "strategy", group = "Runtime", description = "Which mode to use")
+//	public static Strategy STRATEGY = Strategy.EVOSUITE;
 	public static Strategy STRATEGY = Strategy.EVOSUITE;
 
 	@Parameter(key = "process_communication_port", group = "Runtime", description = "Port at which the communication with the external process is done")

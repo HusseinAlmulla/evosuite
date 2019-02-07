@@ -63,7 +63,7 @@ public class OnePlusLambdaLambdaGA<T extends Chromosome> extends AbstractMuLambd
 
     // mutants are evaluated as current population so that the best mutant
     // can be selected
-    population = mutants;
+    population = (ArrayList<T>) mutants;
 
     updateFitnessFunctionsAndValues();
     calculateFitnessAndSortPopulation();
@@ -89,7 +89,7 @@ public class OnePlusLambdaLambdaGA<T extends Chromosome> extends AbstractMuLambd
       }
     }
 
-    population = crossoverOffspring;
+    population = (ArrayList<T>) crossoverOffspring;
     updateFitnessFunctionsAndValues();
     T bestCrossoverOffspring = getBestIndividual();
 

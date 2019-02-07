@@ -83,7 +83,8 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	private static final Logger logger = LoggerFactory.getLogger(GeneticAlgorithm.class);
 
 	/** Fitness function to rank individuals */
-	//protected List<FitnessFunction<T>> fitnessFunctions = new ArrayList<FitnessFunction<T>>();
+	// protected List<FitnessFunction<T>> fitnessFunctions = new
+	// ArrayList<FitnessFunction<T>>();
 	protected ArrayList<FitnessFunction<T>> fitnessFunctions = new ArrayList<FitnessFunction<T>>();
 
 	/** Selection function to select parents */
@@ -1220,7 +1221,7 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 		return subCriteria;
 	}
 
-	public static int numberOfOption = 65;
+	public static int numberOfOption = 64;
 
 	public Criterion[] getOneCriteria(int index) {
 		// Criterion[] originalCriteria = new Criterion[] {Criterion.LINE,
@@ -1783,11 +1784,11 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 
 	public void updateFitnessFunction(Criterion[] temp, int action) {
 		Properties.CRITERION = temp;
-		List<TestFitnessFunction> goals = getGoals(true);
-		this.changePopulation(this.getPopulation(action),this.getFitnessFunction(action));
+//		List<TestFitnessFunction> goals = getGoals(true);
+		this.changePopulation(this.getPopulation(action), this.getFitnessFunction(action));
 		calculateFitnessAndSortPopulation();
 	}
-	
+
 	// List<T> populationList = new ArrayList(64);
 	Map<Integer, T> populationList = new HashMap<Integer, T>();
 
@@ -1808,13 +1809,13 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	/////
 	Map<Integer, Object> allPopulationList = new HashMap<Integer, Object>();
 	Map<Integer, Object> allFitnessFunctionList = new HashMap<Integer, Object>();
-	
+
 	protected ArrayList<T> getPopulation(int index) {
-		return (ArrayList<T>) ((ArrayList<T>)allPopulationList.get(index)).clone();
+		return (ArrayList<T>) ((ArrayList<T>) allPopulationList.get(index)).clone();
 	}
-	
+
 	protected ArrayList<FitnessFunction<T>> getFitnessFunction(int index) {
-		ArrayList<FitnessFunction<T>> tmp = (ArrayList<FitnessFunction<T>>)allFitnessFunctionList.get(index);
+		ArrayList<FitnessFunction<T>> tmp = (ArrayList<FitnessFunction<T>>) allFitnessFunctionList.get(index);
 		return (ArrayList<FitnessFunction<T>>) tmp.clone();
 	}
 
@@ -1880,29 +1881,28 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 			// If this is compositional fitness, we need to make sure
 			// that all functions are consistently minimization or
 			// maximization functions
-			// if (Properties.ALGORITHM != Algorithm.NSGAII && Properties.ALGORITHM !=
-			// Algorithm.SPEA2) {
-			// for (TestSuiteFitnessFunction oldFunction : ffs) {
-			// if (oldFunction.isMaximizationFunction() !=
-			// newFunction.isMaximizationFunction()) {
-			// StringBuffer sb = new StringBuffer();
-			// sb.append("* Invalid combination of fitness functions: ");
-			// sb.append(oldFunction.toString());
-			// if (oldFunction.isMaximizationFunction())
-			// sb.append(" is a maximization function ");
-			// else
-			// sb.append(" is a minimization function ");
-			// sb.append(" but ");
-			// sb.append(newFunction.toString());
-			// if (newFunction.isMaximizationFunction())
-			// sb.append(" is a maximization function ");
-			// else
-			// sb.append(" is a minimization function ");
-			// LoggingUtils.getEvoLogger().info(sb.toString());
-			// throw new RuntimeException("Invalid combination of fitness functions");
-			// }
-			// }
-			// }
+			
+//			if (Properties.ALGORITHM != Algorithm.NSGAII && Properties.ALGORITHM != Algorithm.SPEA2) {
+//				for (TestSuiteFitnessFunction oldFunction : ffs) {
+//					if (oldFunction.isMaximizationFunction() != newFunction.isMaximizationFunction()) {
+//						StringBuffer sb = new StringBuffer();
+//						sb.append("* Invalid combination of fitness functions: ");
+//						sb.append(oldFunction.toString());
+//						if (oldFunction.isMaximizationFunction())
+//							sb.append(" is a maximization function ");
+//						else
+//							sb.append(" is a minimization function ");
+//						sb.append(" but ");
+//						sb.append(newFunction.toString());
+//						if (newFunction.isMaximizationFunction())
+//							sb.append(" is a maximization function ");
+//						else
+//							sb.append(" is a minimization function ");
+//						LoggingUtils.getEvoLogger().info(sb.toString());
+//						throw new RuntimeException("Invalid combination of fitness functions");
+//					}
+//				}
+//			}
 			ffs.add(newFunction);
 
 		}
@@ -1961,38 +1961,6 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 			}
 		}
 		return null;
-	}
-
-	protected void sortPopulationNew() {
-		if (Properties.SHUFFLE_GOALS)
-			Randomness.shuffle(population);
-
-		if (isMaximizationFunction()) {
-			Collections.sort(population, Collections.reverseOrder());
-		} else {
-			T tMax = population.get(0);
-			TestSuiteChromosome max = (TestSuiteChromosome) population.get(0);
-			int[] fsmax = CoverageCriteriaAnalyzer.analyzeCoverageNew(max, Criterion.EXCEPTION);
-			int fmax = fsmax[0] + fsmax[1];
-
-			for (int i = 1; i < population.size(); i++) {
-
-				TestSuiteChromosome tmp = (TestSuiteChromosome) population.get(i);
-				int[] fs = CoverageCriteriaAnalyzer.analyzeCoverageNew(tmp, Criterion.EXCEPTION);
-				int f = fs[0] + fs[1];
-
-				if (f > fmax) {
-					tMax = population.get(i);
-					max = tmp;
-					fsmax = fs;
-					fmax = f;
-				}
-			}
-			T tmp1 = population.get(0);
-			int ind = population.indexOf(tMax);
-			population.set(0, tMax);
-			population.set(ind, tmp1);
-		}
 	}
 
 	///////////////////////

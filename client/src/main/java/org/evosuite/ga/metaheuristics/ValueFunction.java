@@ -76,7 +76,7 @@ public class ValueFunction {
 		// for maximizing the reward
 		double value = value(newcoverage, newsize, newnumOfCoveredGoal, newfitness, newFoundGoals, newaction);
         double delta = reward - averageReward + value - estimation;
-        LoggingUtils.getEvoLogger().info("estimated  Tail value"  + estimation + "  Tail Value  " + value);
+//        LoggingUtils.getEvoLogger().info("estimated  Tail value"  + estimation + "  Tail Value  " + value);
 		//for minimizing the reward
 		//double delta =   reward + averageReward + value(newcoverage, newsize, newnumOfCoveredGoal, newfitness, newaction) - estimation;
 		
