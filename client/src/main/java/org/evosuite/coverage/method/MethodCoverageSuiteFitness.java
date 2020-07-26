@@ -25,12 +25,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.evosuite.Properties;
+import org.evosuite.coverage.diversity.DiversityCoverageSuiteFitness;
 import org.evosuite.ga.archive.Archive;
 import org.evosuite.testcase.ExecutableChromosome;
+import org.evosuite.testcase.TestCase;
 import org.evosuite.testcase.TestChromosome;
 import org.evosuite.testcase.TestFitnessFunction;
 import org.evosuite.testcase.execution.ExecutionResult;
 import org.evosuite.testcase.statements.ConstructorStatement;
+import org.evosuite.testcase.statements.EntityWithParametersStatement;
 import org.evosuite.testcase.statements.Statement;
 import org.evosuite.testsuite.AbstractTestSuiteChromosome;
 import org.evosuite.testsuite.TestSuiteFitnessFunction;
@@ -78,8 +81,11 @@ public class MethodCoverageSuiteFitness extends TestSuiteFitnessFunction {
 		List<MethodCoverageTestFitness> goals = new MethodCoverageFactory().getCoverageGoals();
 		for (MethodCoverageTestFitness goal : goals) {
             methodCoverageMap.put(goal.getClassName() + "." + goal.getMethod(), goal);
+          
 			if(Properties.TEST_ARCHIVE)
 				Archive.getArchiveInstance().addTarget(goal);
+			
+			
 		}
 	}
 
@@ -136,6 +142,8 @@ public class MethodCoverageSuiteFitness extends TestSuiteFitnessFunction {
 				hasTimeoutOrTestException = true;
 				continue;
 			}
+			
+			
 
 			TestChromosome test = new TestChromosome();
 			test.setTestCase(result.test);
@@ -169,7 +177,7 @@ public class MethodCoverageSuiteFitness extends TestSuiteFitnessFunction {
 	        AbstractTestSuiteChromosome<? extends ExecutableChromosome> suite) {
 		logger.trace("Calculating method fitness");
 		double fitness = 0.0;
-
+		
 		List<ExecutionResult> results = runTestSuite(suite);
 
 		// Collect stats in the traces
@@ -223,7 +231,6 @@ public class MethodCoverageSuiteFitness extends TestSuiteFitnessFunction {
 			maxCoveredMethods = coveredMethods;
 			logger.info("Fitness: " + fitness + ", size: " + suite.size() + ", length: "
 			        + suite.totalLengthOfTestCases());
-
 		}
 		if (fitness < bestFitness) {
 			logger.info("(Fitness) Best individual covers " + coveredMethods + "/"
@@ -231,7 +238,6 @@ public class MethodCoverageSuiteFitness extends TestSuiteFitnessFunction {
 			bestFitness = fitness;
 			logger.info("Fitness: " + fitness + ", size: " + suite.size() + ", length: "
 			        + suite.totalLengthOfTestCases());
-
 		}
 	}
 

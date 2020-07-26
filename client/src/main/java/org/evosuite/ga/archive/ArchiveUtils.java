@@ -20,6 +20,7 @@
 package org.evosuite.ga.archive;
 
 import org.evosuite.Properties;
+import org.evosuite.coverage.diversity.DiversityCoverageTestFitness;
 import org.evosuite.coverage.branch.BranchCoverageTestFitness;
 import org.evosuite.coverage.branch.OnlyBranchCoverageTestFitness;
 import org.evosuite.coverage.cbranch.CBranchTestFitness;
@@ -175,6 +176,11 @@ public final class ArchiveUtils {
             return true;
           }
           break;
+        case DIVERSITY:
+            if (goal instanceof DiversityCoverageTestFitness) {
+              return true;
+            }
+            break;
         default:
           AtMostOnceLogger.warn(logger, "Unknown criterion '" + criterion.name() + "'");
           break;

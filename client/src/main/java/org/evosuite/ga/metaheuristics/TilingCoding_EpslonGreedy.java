@@ -1,12 +1,16 @@
 package org.evosuite.ga.metaheuristics;
 
+/*
+Original source is in Python
+https://github.com/ShangtongZhang/reinforcement-learning-an-introduction
+*/
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Set;
 
 import org.evosuite.utils.LoggingUtils;
 
-public class ValueFunction {
+public class TilingCoding_EpslonGreedy {
 
 	private static int numOfTilings = 0;
 	private static double alpha = 0;
@@ -16,13 +20,13 @@ public class ValueFunction {
 	private double[] weights;
 	
 	private static int numOfOption = 0;
-	public ValueFunction(int nOfT, double al, double be) {
+	public TilingCoding_EpslonGreedy(int nOfT, double al, double be) {
 		numOfTilings = nOfT;
 		int maxSize = 4096;
 		hashTable = new IHT(maxSize);		
 		weights = new double [maxSize];		
         averageReward = 0.0;
-        alpha = al / numOfTilings;
+        alpha = al ;/// numOfTilings;
         beta = be;		
         numOfOption = org.evosuite.ga.metaheuristics.MonotonicGA.numberOfOption;
 	}
@@ -34,17 +38,30 @@ public class ValueFunction {
 	}
 	
 	public double value(double coverage, int size, int numOfCoveredGoal, double fitness, int newFoundGoals, int action) {
-		double[] floats = {coverage, size, numOfCoveredGoal, fitness, newFoundGoals};
+		double[] floats = {coverage, size, numOfCoveredGoal, fitness, newFoundGoals, (coverage + numOfCoveredGoal - fitness + newFoundGoals)/4000};
 		//LoggingUtils.getEvoLogger().info("Coverage " + coverage + "   Size " +  size, "   Num  "+  numOfCoveredGoal, "  Fit  " +fitness);
 		ArrayList<Integer> activeTiles = getActiveTiles(floats, action);
 		double sum = 0;
 		//String st = "";
 		for(int i=0; i < activeTiles.size(); i++) {
-			sum += weights[activeTiles.get(i)];
-			//st += activeTiles.get(i) + " , ";
+			int[] features = hashTable.index_features.get(activeTiles.get(i));
+			double res = vectorTimeInt(features, weights[activeTiles.get(i)]);
+			sum += res;
+		
+			
+			
+//			sum += weights[activeTiles.get(i)];
 		}	        
 		//LoggingUtils.getEvoLogger().info("Tiles " + st);
 	        return sum;
+	}
+	
+	private double vectorTimeInt(int[] features, double weight) {
+		double sum = 0;
+		for (int v: features) {
+			sum += v * weight;
+		}
+		return sum;
 	}
 	
 	public double[] stateValue(double coverage, int size, int numOfCoveredGoal, double fitness, int newFoundGoals) {
@@ -64,15 +81,39 @@ public class ValueFunction {
 	}
 	
 	
+//	public double stateValue_softmax(double coverage, int size, int numOfCoveredGoal, double fitness, int newFoundGoals, int current_action) {
+//		double[] values = new double[numOfOption];
+//		int max = 0;
+//		double current_action_value = value(coverage, size, numOfCoveredGoal, fitness, newFoundGoals, current_action);
+//		double sum = 0;
+//		for(int i=0; i<numOfOption; i++) {
+//			int action = i;
+//			values[i] = value(coverage, size, numOfCoveredGoal, fitness, newFoundGoals, action);
+//			sum += Math.exp(0.5 * values[i]);			
+//		}
+//		double pro_pi = Math.exp(current_action_value)/sum;		
+//		return pro_pi;
+//	}
+//	
+	
+	
+	private static ArrayList<Double> semi_gediant = new ArrayList<Double>();
+	
 	public void learn(double coverage, int size, int numOfCoveredGoal, double fitness, int FoundGoals, int action
 					, double newcoverage, int newsize, int newnumOfCoveredGoal, double newfitness, int newFoundGoals, int newaction, double reward) {
 		
-		double[] floats = {coverage, size, numOfCoveredGoal, fitness};
+		double[] floats = {coverage, size, numOfCoveredGoal, fitness,FoundGoals, (coverage + numOfCoveredGoal - fitness + newFoundGoals)};
 		ArrayList<Integer> activeTiles = getActiveTiles(floats, action);
+		
         double estimation = 0;
 		for(int i=0; i < activeTiles.size(); i++) {
-			estimation += weights[activeTiles.get(i)];
+			int[] features = hashTable.index_features.get(activeTiles.get(i));
+			double res = vectorTimeInt(features, weights[activeTiles.get(i)]);
+			estimation += res;
+			
+//			estimation += weights[activeTiles.get(i)];	
 		}	
+		
 		// for maximizing the reward
 		double value = value(newcoverage, newsize, newnumOfCoveredGoal, newfitness, newFoundGoals, newaction);
         double delta = reward - averageReward + value - estimation;
@@ -83,9 +124,14 @@ public class ValueFunction {
         averageReward += beta * delta;
         delta *= alpha;
         
-        for (int activeTile: activeTiles)
-            weights[activeTile] += delta;
-        
+        double res = 0;
+        for (int activeTile: activeTiles) {
+        	int[] features = hashTable.index_features.get(activeTile);
+			res += vectorTimeInt(features,delta);
+			
+//        	weights[activeTile] += delta;
+			weights[activeTile] += res;
+        }
 	}
 	
 	public void printHash() {

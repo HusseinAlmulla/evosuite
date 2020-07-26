@@ -38,6 +38,9 @@ import org.evosuite.coverage.dataflow.AllDefsCoverageTestFitness;
 import org.evosuite.coverage.dataflow.DefUseCoverageFactory;
 import org.evosuite.coverage.dataflow.DefUseCoverageSuiteFitness;
 import org.evosuite.coverage.dataflow.DefUseCoverageTestFitness;
+import org.evosuite.coverage.diversity.DiversityCoverageFactory;
+import org.evosuite.coverage.diversity.DiversityCoverageSuiteFitness;
+import org.evosuite.coverage.diversity.DiversityCoverageTestFitness;
 import org.evosuite.coverage.exception.ExceptionCoverageFactory;
 import org.evosuite.coverage.exception.ExceptionCoverageSuiteFitness;
 import org.evosuite.coverage.exception.ExceptionCoverageTestFitness;
@@ -108,6 +111,7 @@ public class FitnessFunctions {
 	 * @return a {@link org.evosuite.testsuite.TestSuiteFitnessFunction} object.
 	 */
 	public static TestSuiteFitnessFunction getFitnessFunction(Criterion criterion) {
+		
 		switch (criterion) {
 		case STRONGMUTATION:
 			return new StrongMutationSuiteFitness();
@@ -145,6 +149,8 @@ public class FitnessFunctions {
 			return new MethodTraceCoverageSuiteFitness();
 		case METHOD:
 			return new MethodCoverageSuiteFitness();
+		case DIVERSITY:
+			return new DiversityCoverageSuiteFitness();
 		case METHODNOEXCEPTION:
 			return new MethodNoExceptionCoverageSuiteFitness();
 		case ONLYLINE:
@@ -161,6 +167,7 @@ public class FitnessFunctions {
 			logger.warn("No TestSuiteFitnessFunction defined for {}; using default one (BranchCoverageSuiteFitness)", Arrays.toString(Properties.CRITERION));
 			return new BranchCoverageSuiteFitness();
 		}
+		
 	}
 	
 	/**
@@ -218,6 +225,8 @@ public class FitnessFunctions {
 			return new InputCoverageFactory();
 		case TRYCATCH:
 			return new TryCatchCoverageFactory();
+		case DIVERSITY:
+			return new DiversityCoverageFactory();
 		default:
 			logger.warn("No TestFitnessFactory defined for " + crit
 			        + " using default one (BranchCoverageFactory)");
@@ -282,6 +291,8 @@ public class FitnessFunctions {
 				return InputCoverageTestFitness.class;
 		case TRYCATCH:
 				return TryCatchCoverageTestFitness.class;
+		case DIVERSITY:
+			return DiversityCoverageTestFitness.class;
 		default:
 				throw new RuntimeException("No criterion defined for " + criterion.name());
 		}

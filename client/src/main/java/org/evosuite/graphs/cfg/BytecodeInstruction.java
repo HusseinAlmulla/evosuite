@@ -385,10 +385,10 @@ public class BytecodeInstruction extends ASMWrapper implements Serializable,
 
 		ActualControlFlowGraph myCFG = GraphPool.getInstance(classLoader).getActualCFG(className,
 		                                                                               methodName);
+		
 		if (myCFG == null)
 			throw new IllegalStateException(
-					"expect GraphPool to know CFG for every method for which an instruction is known");
-
+					"expect GraphPool to know CFG for every method for which an instruction is known ");
 		return myCFG;
 	}
 

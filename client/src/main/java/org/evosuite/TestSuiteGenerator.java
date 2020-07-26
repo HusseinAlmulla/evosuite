@@ -467,7 +467,7 @@ public class TestSuiteGenerator {
 
 				LoggingUtils.getEvoLogger()
 						.info("* " + ClientProcess.getPrettyPrintIdentifier() + "Minimizing test suite");
-				//minimizer.minimize(testSuite, true);
+				minimizer.minimize(testSuite, true);
 
 				double after = testSuite.getFitness();
 				if (after > before + 0.01d) { // assume minimization
@@ -488,18 +488,21 @@ public class TestSuiteGenerator {
 
 		if (Properties.COVERAGE) {
 			///////////////////////////// Calculate the Exception coverage and goals
-			boolean expFlag = false;
-			for (Criterion crt : Properties.CRITERION) {
-				if (crt == Criterion.EXCEPTION) {
-					expFlag = true;
-					break;
-				}
-			}
-			if (expFlag == false) {
-//				ExceptionCoverageSuiteFitness branchFitness = new ExceptionCoverageSuiteFitness();
-//				branchFitness.getFitness(testSuite);
-				CoverageCriteriaAnalyzer.analyzeCoverage(testSuite, Criterion.EXCEPTION);
-			}
+//			boolean expFlag = false;
+//			for (Criterion crt : Properties.CRITERION) {
+//				if (crt == Criterion.STRONGMUTATION) {
+//					expFlag = true;
+//					break;
+//				}
+//			}
+//			if (expFlag == false) {
+////				ExceptionCoverageSuiteFitness branchFitness = new ExceptionCoverageSuiteFitness();
+////				branchFitness.getFitness(testSuite);
+//				CoverageCriteriaAnalyzer.analyzeCoverage(testSuite, Criterion.STRONGMUTATION);
+//			}
+			
+			
+			CoverageCriteriaAnalyzer.getDiversityScore(testSuite);
 			////////////////////////////
 			ClientServices.getInstance().getClientNode().changeState(ClientState.COVERAGE_ANALYSIS);
 			CoverageCriteriaAnalyzer.analyzeCoverage(testSuite);
@@ -509,7 +512,7 @@ public class TestSuiteGenerator {
 
 		if (ArrayUtil.contains(Properties.CRITERION, Criterion.MUTATION)
 				|| ArrayUtil.contains(Properties.CRITERION, Criterion.STRONGMUTATION)) {
-			// SearchStatistics.getInstance().mutationScore(coverage);
+//			 SearchStatistics.getInstance().mutationScore(coverage);
 		}
 
 		StatisticsSender.executedAndThenSendIndividualToMaster(testSuite);

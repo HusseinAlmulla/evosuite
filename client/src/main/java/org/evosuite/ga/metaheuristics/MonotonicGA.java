@@ -20,25 +20,38 @@
 package org.evosuite.ga.metaheuristics;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.evosuite.Properties;
+import org.evosuite.Properties.APPROACH;
 import org.evosuite.Properties.Criterion;
 import org.evosuite.TimeController;
 import org.evosuite.coverage.CoverageCriteriaAnalyzer;
-import org.evosuite.coverage.exception.ExceptionCoverageSuiteFitness;
+import org.evosuite.coverage.diversity.DiversityCoverageSuiteFitness;
+import org.evosuite.coverage.diversity.DiversityCoverageTestFitness;
+import org.evosuite.coverage.mutation.MutationPool;
 import org.evosuite.ga.Chromosome;
 import org.evosuite.ga.ChromosomeFactory;
 import org.evosuite.ga.ConstructionFailedException;
 import org.evosuite.ga.FitnessFunction;
 import org.evosuite.ga.FitnessReplacementFunction;
 import org.evosuite.ga.ReplacementFunction;
-import org.evosuite.ga.localsearch.LocalSearchBudget;
+import org.evosuite.testcase.TestCase;
 import org.evosuite.testsuite.TestSuiteChromosome;
 import org.evosuite.utils.LoggingUtils;
 import org.evosuite.utils.Randomness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import junit.framework.TestSuite;
+
+import org.evosuite.assertion.SimpleMutationAssertionGenerator;
+import org.evosuite.assertion.MutationAssertionGenerator;
+
 
 /**
  * Implementation of steady state GA
@@ -105,11 +118,11 @@ public class MonotonicGA<T extends Chromosome> extends GeneticAlgorithm<T> {
 			T parent2;
 			if (Properties.HEADLESS_CHICKEN_TEST)
 				parent2 = newRandomIndividual(); // crossover with new random
-													// individual
+			// individual
 			else
 				parent2 = selectionFunction.select(population); // crossover
-																// with existing
-																// individual
+			// with existing
+			// individual
 
 			T offspring1 = (T) parent1.clone();
 			T offspring2 = (T) parent2.clone();
@@ -214,8 +227,8 @@ public class MonotonicGA<T extends Chromosome> extends GeneticAlgorithm<T> {
 	}
 
 	private static final double DELTA = 0.000000001; // it seems there is some
-														// rounding error in LS,
-														// but hard to debug :(
+	// rounding error in LS,
+	// but hard to debug :(
 
 	/** {@inheritDoc} */
 	@Override
@@ -240,35 +253,49 @@ public class MonotonicGA<T extends Chromosome> extends GeneticAlgorithm<T> {
 
 		//////////
 		int counter = 0;
+		Criterion[] optAction11 = new Criterion[] { Criterion.DIVERSITY   }; 
+		removeFitnessFunction(optAction11);
+		updateBestIndividualFromArchive();
+
 		int gen = 0;
 		RLAlgorithm rl = new RLAlgorithm(numberOfOption);
+		//		RLAlgorithm2 rl2 = new RLAlgorithm2(numberOfOption);
+
+		//		SemiGradient_TD_0 rl = new SemiGradient_TD_0(numberOfOption);
+		boolean flag = true;
 		int action = -1;
 		int previous_action = -2;
+		ArrayList<Double> qValues = new ArrayList<Double>();
+		ArrayList<Double> rewardFFValues = new ArrayList<Double>();
+		ArrayList<Double> rewardDisValues = new ArrayList<Double>();
 		//////////
 
 		while (!isFinished()) {
+
 			////////////
-
-			if (gen % 3 == 0) {
-				action = rl.UCB_part1(counter);
-				// action = rl.getCurrent_action();
-				// action = rl.TS_part1();
-
-				LoggingUtils.getEvoLogger().info("option  " + action);
-				//
-				// Criterion[] optAction = getOneCriteria(action);
-				Criterion[] optAction = getOneCriteriaWithException(action);
-				// Criterion[] optAction = getOneCriteria(action);
-				if (action != previous_action) {
-					if (counter > numberOfOption) {
-						updateFitnessFunction(optAction, action);
-
-					} else {
-						removeFitnessFunction(optAction);
+//			if(gen % 3 ==0) {
+				if (Properties.USE_APPROACH != APPROACH.EVSNORL) {
+					if (Properties.USE_APPROACH == APPROACH.EVSF_DSGSARSA_EPSG || Properties.USE_APPROACH == APPROACH.EVSF_DSGSARSA_SOFTMAX) {
+						action = rl.getCurrent_action();
 					}
-					previous_action = action;
+					else if (Properties.USE_APPROACH == APPROACH.EVSF_UCB) {
+						action = rl.UCB_part1(counter);
+					}
+
+					LoggingUtils.getEvoLogger().info("option  " + action);
+					Criterion[] optAction = getOneCriteriaDiversity(action);
+
+					if (action != previous_action) {
+						if (counter > numberOfOption) {
+							updateFitnessFunction(optAction, action); 
+						} else {
+							removeFitnessFunction(optAction);
+						}
+						previous_action = action;
+					}
+					//					removeFitnessFunction(optAction);
 				}
-			}
+//			}
 
 			////////////
 			logger.info("Population size before: " + population.size());
@@ -285,11 +312,11 @@ public class MonotonicGA<T extends Chromosome> extends GeneticAlgorithm<T> {
 				if (getFitnessFunction().isMaximizationFunction())
 					assert (bestFitnessAfterEvolution >= (bestFitnessBeforeEvolution
 							- DELTA)) : "best fitness before evolve()/sortPopulation() was: "
-									+ bestFitnessBeforeEvolution + ", now best fitness is " + bestFitnessAfterEvolution;
-				else
-					assert (bestFitnessAfterEvolution <= (bestFitnessBeforeEvolution
-							+ DELTA)) : "best fitness before evolve()/sortPopulation() was: "
-									+ bestFitnessBeforeEvolution + ", now best fitness is " + bestFitnessAfterEvolution;
+							+ bestFitnessBeforeEvolution + ", now best fitness is " + bestFitnessAfterEvolution;
+					else
+						assert (bestFitnessAfterEvolution <= (bestFitnessBeforeEvolution
+								+ DELTA)) : "best fitness before evolve()/sortPopulation() was: "
+								+ bestFitnessBeforeEvolution + ", now best fitness is " + bestFitnessAfterEvolution;
 			}
 
 			{
@@ -300,11 +327,11 @@ public class MonotonicGA<T extends Chromosome> extends GeneticAlgorithm<T> {
 				if (getFitnessFunction().isMaximizationFunction())
 					assert (bestFitnessAfterLocalSearch >= (bestFitnessBeforeLocalSearch
 							- DELTA)) : "best fitness before applyLocalSearch() was: " + bestFitnessBeforeLocalSearch
-									+ ", now best fitness is " + bestFitnessAfterLocalSearch;
-				else
-					assert (bestFitnessAfterLocalSearch <= (bestFitnessBeforeLocalSearch
-							+ DELTA)) : "best fitness before applyLocalSearch() was: " + bestFitnessBeforeLocalSearch
-									+ ", now best fitness is " + bestFitnessAfterLocalSearch;
+					+ ", now best fitness is " + bestFitnessAfterLocalSearch;
+					else
+						assert (bestFitnessAfterLocalSearch <= (bestFitnessBeforeLocalSearch
+								+ DELTA)) : "best fitness before applyLocalSearch() was: " + bestFitnessBeforeLocalSearch
+						+ ", now best fitness is " + bestFitnessAfterLocalSearch;
 			}
 
 			/*
@@ -321,126 +348,91 @@ public class MonotonicGA<T extends Chromosome> extends GeneticAlgorithm<T> {
 
 			if (getFitnessFunction().isMaximizationFunction())
 				assert (newFitness >= (bestFitness - DELTA)) : "best fitness was: " + bestFitness
-						+ ", now best fitness is " + newFitness;
-			else
-				assert (newFitness <= (bestFitness + DELTA)) : "best fitness was: " + bestFitness
-						+ ", now best fitness is " + newFitness;
-			bestFitness = newFitness;
+				+ ", now best fitness is " + newFitness;
+				else
+					assert (newFitness <= (bestFitness + DELTA)) : "best fitness was: " + bestFitness
+					+ ", now best fitness is " + newFitness;
+					bestFitness = newFitness;
 
-			if (Double.compare(bestFitness, lastBestFitness) == 0) {
-				starvationCounter++;
-			} else {
-				logger.info("reset starvationCounter after " + starvationCounter + " iterations");
-				starvationCounter = 0;
-				lastBestFitness = bestFitness;
+					if (Double.compare(bestFitness, lastBestFitness) == 0) {
+						starvationCounter++;
+					} else {
+						logger.info("reset starvationCounter after " + starvationCounter + " iterations");
+						starvationCounter = 0;
+						lastBestFitness = bestFitness;
 
-			}
-			updateSecondaryCriterion(starvationCounter);
+					}
+					updateSecondaryCriterion(starvationCounter);
 
-			logger.info("Current iteration: " + currentIteration);
-			this.notifyIteration();
+					logger.info("Current iteration: " + currentIteration);
+					this.notifyIteration();
 
-			logger.info("Population size: " + population.size());
-			logger.info("Best individual has fitness: " + population.get(0).getFitness());
-			logger.info("Worst individual has fitness: " + population.get(population.size() - 1).getFitness());
+					logger.info("Population size: " + population.size());
+					logger.info("Best individual has fitness: " + population.get(0).getFitness());
+					logger.info("Worst individual has fitness: " + population.get(population.size() - 1).getFitness());
+					TestSuiteChromosome testSuite11 = (TestSuiteChromosome) this.getBestIndividual();
+					/////////////////////////
+//					if(gen % 3 == 0) {
+//						if (Properties.USE_APPROACH != APPROACH.EVSNORL) {
+							TestSuiteChromosome testSuite = (TestSuiteChromosome) this.getBestIndividual();
+							this.setPopulation(action);
+							Criterion[] tmp = Properties.CRITERION;
+							
+							DiversityCoverageSuiteFitness DivSuiteFit = new DiversityCoverageSuiteFitness();
+							double fitness1 = DivSuiteFit.getFitness(testSuite);
+							double cfit1 = testSuite.getFitness();
+							double cov1 = testSuite.getCoverage();
+							double dist1 = testSuite.getDistance();
 
-			/////////////////////////
+							int[] reward_score =  new int[2];//CoverageCriteriaAnalyzer.analyzeCoverageNew(testSuite, Properties.CRITERION[0]);
 
-			if (gen % 3 == 0) {
-				TestSuiteChromosome testSuite = (TestSuiteChromosome) this.getBestIndividual();
-				this.setPopulation(action);
+							reward_score[0] =  (int) (fitness1);//(int) this.getBestIndividual().getDistance();
+							reward_score[1] =  (int) (dist1);//(int) this.getBestIndividual().getDistance();//(Math.abs(Math.round(this.getBestIndividual().getFitness() * 1000)));
 
-				// ExceptionCoverageSuiteFitness exceptionSuite = new
-				// ExceptionCoverageSuiteFitness();
-				// changing the criteria to Exception so archive will deal with TestSuite as the
-				// Exception is the goal.
-				// Criterion[] tmp = Properties.CRITERION;
-				// Properties.CRITERION = new Criterion[] { Criterion.EXCEPTION };
-				// double fitness = exceptionSuite.getFitness(testSuite);
-				int[] reward_score = CoverageCriteriaAnalyzer.analyzeCoverageNew(testSuite, Criterion.EXCEPTION);
+							LoggingUtils.getEvoLogger().info("option  " + action + "  coverage " + reward_score[0] + " distance " + reward_score[1]);
 
-				// int[] reward_score1 = CoverageCriteriaAnalyzer.analyzeCoverageNew(testSuite,
-				// Criterion.BRANCH);
-				// int re0 = reward_score[0] + reward_score1[0];
-				// int re1 = reward_score[1] + reward_score1[1];
-
-				LoggingUtils.getEvoLogger()
-						.info("option  " + action + "  goals_found " + reward_score[0] + " covered " + reward_score[1]);
-
-				// rl.DSGSarsa_part2(counter, testSuite.getCoverage(), testSuite.size(),
-				// reward_score[1],
-				// testSuite.getFitness(), reward_score[0], reward_score[0] + reward_score[1]);
-
-				rl.UCB_part2(reward_score[0] + reward_score[1], action);
-
-				// rl.TS_part2(counter, action, reward_score[0] + reward_score[1]);
-				// LoggingUtils.getEvoLogger().info(" goals_found " + re0 +" covered " + re1);
-				// rl.DSGSarsa_part2(counter, testSuite.getCoverage(), testSuite.size(), re1,
-				// testSuite.getFitness(),re0, re0);
-
-				// LoggingUtils.getEvoLogger().info("Counter : " + counter);
-				// updateBestIndividualFromArchive();
-				// Properties.CRITERION = tmp;
-				counter++;
-			}
-			gen++;
-			////////////////////////
-
+							if (Properties.USE_APPROACH == APPROACH.EVSF_DSGSARSA_EPSG) {
+								double qValue = rl.DSGSarsa_part2_LC_EpsG(counter, testSuite.getCoverage(), testSuite.size(),
+										reward_score[1], testSuite.getFitness(), reward_score[0], reward_score[1]);
+								qValues.add(qValue);
+								rewardFFValues.add(cfit1);
+								rewardDisValues.add(dist1);
+							}
+							else if (Properties.USE_APPROACH == APPROACH.EVSF_DSGSARSA_SOFTMAX) {
+								rl.DSGSarsa_part2_LCF_SM(counter, testSuite.getCoverage(), testSuite.size(),
+										reward_score[1], testSuite.getFitness(), reward_score[0], reward_score[1]);
+							}
+							else if (Properties.USE_APPROACH == APPROACH.EVSF_UCB) {
+								rl.UCB_part2(reward_score[1], action);
+							}
+							else if (Properties.USE_APPROACH == APPROACH.EVSNORL) {
+								LoggingUtils.getEvoLogger().info("\nFitness " + testSuite11.getFitness() );
+								LoggingUtils.getEvoLogger().info("Coverage " + testSuite11.getCoverage());
+							}
+							counter++; 
+							LoggingUtils.getEvoLogger().info("gen: " + gen );
+//						}
+//						((TestSuiteChromosome)population.get(0)).getTestChromosomes().forEach(t -> t.setChanged(false));
+//					}	
+					gen++;
+					
+					
+					////////////////////////
 		}
 
 		////////////////////////////
-		rl.prt();
-		// LoggingUtils.getEvoLogger().info("Last action " + rl.getCurrent_action());
-		// TestSuiteChromosome testSuite = (TestSuiteChromosome)
-		// this.getBestIndividual();
-		// // changing the criteria to Exception so archive will deal with TestSuite as
-		// the
-		// // Exception is the goal.
-		//
-		// Criterion[] tmp = Properties.CRITERION;
-		// Properties.CRITERION = new Criterion[] { Criterion.EXCEPTION };
-		// int[] reward_score = CoverageCriteriaAnalyzer.analyzeCoverageNew(testSuite,
-		// Criterion.EXCEPTION);
-		// LoggingUtils.getEvoLogger().info(" goals_found " + reward_score[0] + "
-		// covered " + reward_score[1]);
-		// Properties.CRITERION = tmp;
-		// LoggingUtils.getEvoLogger().info(" First one " + testSuite.getCoverage() + "
-		// " + testSuite.size() + " "
-		// + testSuite.getNumOfCoveredGoals() + " " + testSuite.getFitness());
-		//
-		// int finalAction = rl.DSGSarsa_FinalEstimation(testSuite.getCoverage(),
-		// testSuite.size(),
-		// testSuite.getNumOfCoveredGoals(), reward_score[0], reward_score[1]);
-		//
-		// LoggingUtils.getEvoLogger().info("current " + finalAction);
-		// action = rl.UCB_part1(counter);
-		// LoggingUtils.getEvoLogger().info("current " + action);
-		Criterion[] optAction = new Criterion[] { Criterion.EXCEPTION, }; // Criterion[]
-		// optAction = getOneCriteriaWithException(finalAction);
-		// Criterion[] optAction = getOneCriteria(finalAction);
 
-		removeFitnessFunction(optAction);
-		updateBestIndividualFromArchive();
+		if (Properties.USE_APPROACH != APPROACH.EVSNORL) {
+			rl.prt();
+			Criterion[] optAction = new Criterion[] { Criterion.DIVERSITY }; 
+			removeFitnessFunction(optAction);
+			((TestSuiteChromosome)population.get(0)).getTestChromosomes().forEach(t -> t.setChanged(false));
+			//			updateBestIndividualFromArchive();
+		}
 
-		/*
-		 * int max = 0; double sumR[] = RLAlgorithm.getSums_of_rewards(); for (int i =
-		 * 0; i < sumR.length; i++) { if (sumR[i] > sumR[max]) { max = i; } }
-		 * 
-		 * removeFitnessFunction(getOneCriteria(max));
-		 * removeFitnessFunction(getOneCriteriaWithException(max));
-		 * updateBestIndividualFromArchive();
-		 */
-		/*
-		 * String finalCriteria = ""; for (Criterion crt : getOneCriteria(max)) { if
-		 * (finalCriteria != "") finalCriteria += ":"; finalCriteria += crt.toString();
-		 * }
-		 */
-		// LoggingUtils.getEvoLogger().info("BestOption_ " + finalCriteria);
-		////////////////////////////
-
+				((TestSuiteChromosome)population.get(0)).getTestChromosomes().forEach(t -> t.setChanged(false));
 		// archive
 		TimeController.execute(this::updateBestIndividualFromArchive, "update from archive", 5_000);
-
 		notifySearchFinished();
 	}
 

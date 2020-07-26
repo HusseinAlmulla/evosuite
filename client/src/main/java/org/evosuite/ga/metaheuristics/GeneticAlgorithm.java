@@ -613,7 +613,7 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	 */
 	protected void calculateFitness(T c) {
 		for (FitnessFunction<T> fitnessFunction : this.fitnessFunctions) {
-			fitnessFunction.getFitness(c);
+ 			fitnessFunction.getFitness(c);
 			notifyEvaluation(c);
 		}
 	}
@@ -622,7 +622,7 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	 * Calculate fitness for all individuals and sort them
 	 */
 	protected void calculateFitnessAndSortPopulation() {
-		this.calculateFitness();
+ 		this.calculateFitness();
 		// Sort population
 		this.sortPopulation();
 	}
@@ -1221,7 +1221,7 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 		return subCriteria;
 	}
 
-	public static int numberOfOption = 64;
+	public static int numberOfOption = 44;
 
 	public Criterion[] getOneCriteria(int index) {
 		// Criterion[] originalCriteria = new Criterion[] {Criterion.LINE,
@@ -1769,6 +1769,1104 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 		return subCriteria;
 	}
 
+//	 --- 37
+	public Criterion[] getCriteriaOfStrongMutation(int index) {
+		Criterion[] subCriteria = new Criterion[3];
+		switch (index) {
+		case 0:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.LINE };
+			break;
+		case 1:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.EXCEPTION };
+			break;
+		case 2:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.WEAKMUTATION };
+			break;
+		case 3:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.OUTPUT };
+			break;
+		case 4:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.METHOD };
+			break;
+		case 5:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.CBRANCH };
+			break;
+		case 6:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.METHODNOEXCEPTION };
+			break;
+		case 7:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.EXCEPTION };
+			break;
+		case 8:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.METHOD };
+			break;
+		case 9:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.CBRANCH };
+			break;
+		case 10:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.METHODNOEXCEPTION };
+			break;
+		case 11:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.WEAKMUTATION };
+			break;
+		case 12:
+			subCriteria = new Criterion[] { Criterion.LINE, Criterion.OUTPUT };
+			break;
+		case 13:
+			subCriteria = new Criterion[] { Criterion.CBRANCH, Criterion.METHOD };
+			break;
+		case 14:
+			subCriteria = new Criterion[] { Criterion.CBRANCH, Criterion.EXCEPTION };
+			break;
+		case 15:
+			subCriteria = new Criterion[] { Criterion.CBRANCH, Criterion.METHODNOEXCEPTION };
+			break;
+		case 16:
+			subCriteria = new Criterion[] { Criterion.CBRANCH, Criterion.WEAKMUTATION };
+			break;
+		case 17:
+			subCriteria = new Criterion[] { Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 18:
+			subCriteria = new Criterion[] { Criterion.METHOD, Criterion.EXCEPTION };
+			break;
+		case 19:
+			subCriteria = new Criterion[] { Criterion.METHOD, Criterion.METHODNOEXCEPTION };
+			break;
+		case 20:
+			subCriteria = new Criterion[] { Criterion.METHOD, Criterion.WEAKMUTATION };
+			break;
+		case 21:
+			subCriteria = new Criterion[] { Criterion.METHOD, Criterion.OUTPUT };
+			break;
+		case 22:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 23:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 24:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.OUTPUT };
+			break;
+		case 25:
+			subCriteria = new Criterion[] { Criterion.METHODNOEXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 26:
+			subCriteria = new Criterion[] { Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 27:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION, Criterion.OUTPUT };
+			break;
+
+		// one
+		case 28:
+			subCriteria = new Criterion[] { Criterion.BRANCH };
+			break;
+		case 29:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION };
+			break;
+		case 30:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION };
+			break;
+		case 31:
+			subCriteria = new Criterion[] { Criterion.METHODNOEXCEPTION };
+			break;
+		case 32:
+			subCriteria = new Criterion[] { Criterion.OUTPUT };
+			break;
+		case 33:
+			subCriteria = new Criterion[] { Criterion.CBRANCH };
+			break;
+		case 34:
+			subCriteria = new Criterion[] { Criterion.METHOD };
+			break;
+		case 35:
+			subCriteria = new Criterion[] { Criterion.LINE };
+			break;
+		case 36:
+			subCriteria = new Criterion[] { Criterion.STRONGMUTATION };
+			break;
+		}
+
+		return subCriteria;
+	}
+
+//	No StrongMutation and no Line  --- 43
+	public Criterion[] getOneCriteriaSelected(int index) {
+		Criterion[] subCriteria = new Criterion[3];
+		switch (index) {
+		case 0:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.EXCEPTION };
+			break;
+		case 1:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.WEAKMUTATION };
+			break;
+		case 2:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.OUTPUT };
+			break;
+		case 3:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.METHOD };
+			break;
+		case 4:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.CBRANCH };
+			break;
+		case 5:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.METHODNOEXCEPTION };
+			break;
+		case 6:
+			subCriteria = new Criterion[] { Criterion.CBRANCH, Criterion.METHOD };
+			break;
+		case 7:
+			subCriteria = new Criterion[] { Criterion.CBRANCH, Criterion.EXCEPTION };
+			break;
+		case 8:
+			subCriteria = new Criterion[] { Criterion.CBRANCH, Criterion.METHODNOEXCEPTION };
+			break;
+		case 9:
+			subCriteria = new Criterion[] { Criterion.CBRANCH, Criterion.WEAKMUTATION };
+			break;
+		case 10:
+			subCriteria = new Criterion[] { Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 11:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 12:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 13:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.OUTPUT };
+			break;
+		case 14:
+			subCriteria = new Criterion[] { Criterion.METHODNOEXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 15:
+			subCriteria = new Criterion[] { Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 16:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION, Criterion.OUTPUT };
+			break;
+		case 17:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.OUTPUT };
+			break;
+		case 18:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.CBRANCH };
+			break;
+		case 19:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 20:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.EXCEPTION };
+			break;
+		case 21:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.EXCEPTION, Criterion.OUTPUT };
+			break;
+		case 22:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.EXCEPTION, Criterion.CBRANCH };
+			break;
+		case 23:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 24:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 25:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH };
+			break;
+		case 26:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 27:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION, Criterion.EXCEPTION, Criterion.OUTPUT };
+			break;
+		case 28:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION, Criterion.EXCEPTION, Criterion.CBRANCH };
+			break;
+		case 29:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 30:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION, Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 31:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH };
+			break;
+		case 32:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 33:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 34:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH };
+			break;
+		case 35:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 36:
+			subCriteria = new Criterion[] { Criterion.METHODNOEXCEPTION, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 37:
+			subCriteria = new Criterion[] { Criterion.BRANCH };
+			break;
+		case 38:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION };
+			break;
+		case 39:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION };
+			break;
+		case 40:
+			subCriteria = new Criterion[] { Criterion.METHODNOEXCEPTION };
+			break;
+		case 41:
+			subCriteria = new Criterion[] { Criterion.OUTPUT };
+			break;
+		case 42:
+			subCriteria = new Criterion[] { Criterion.CBRANCH };
+			break;
+		}
+
+		return subCriteria;
+	}
+
+	
+//	No StrongMutation and no Line  --- 44
+	public Criterion[] getOneCriteriaDiversity(int index) {
+		Criterion[] subCriteria = new Criterion[3];
+		switch (index) {
+		case 0:
+			subCriteria = new Criterion[] { Criterion.DIVERSITY, Criterion.BRANCH, Criterion.EXCEPTION };
+			break;
+		case 1:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.BRANCH, Criterion.WEAKMUTATION };
+			break;
+		case 2:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.BRANCH, Criterion.OUTPUT };
+			break;
+		case 3:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.BRANCH, Criterion.METHOD };
+			break;
+		case 4:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.BRANCH, Criterion.CBRANCH };
+			break;
+		case 5:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.BRANCH, Criterion.METHODNOEXCEPTION };
+			break;
+		case 6:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.CBRANCH, Criterion.METHOD };
+			break;
+		case 7:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.CBRANCH, Criterion.EXCEPTION };
+			break;
+		case 8:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.CBRANCH, Criterion.METHODNOEXCEPTION };
+			break;
+		case 9:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.CBRANCH, Criterion.WEAKMUTATION };
+			break;
+		case 10:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 11:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 12:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.EXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 13:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.EXCEPTION, Criterion.OUTPUT };
+			break;
+		case 14:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.METHODNOEXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 15:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 16:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.WEAKMUTATION, Criterion.OUTPUT };
+			break;
+		case 17:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.OUTPUT };
+			break;
+		case 18:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.CBRANCH };
+			break;
+		case 19:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 20:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.EXCEPTION };
+			break;
+		case 21:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.BRANCH, Criterion.EXCEPTION, Criterion.OUTPUT };
+			break;
+		case 22:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.BRANCH, Criterion.EXCEPTION, Criterion.CBRANCH };
+			break;
+		case 23:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.BRANCH, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 24:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.BRANCH, Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 25:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.BRANCH, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH };
+			break;
+		case 26:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.BRANCH, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 27:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.WEAKMUTATION, Criterion.EXCEPTION, Criterion.OUTPUT };
+			break;
+		case 28:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.WEAKMUTATION, Criterion.EXCEPTION, Criterion.CBRANCH };
+			break;
+		case 29:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.WEAKMUTATION, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 30:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.WEAKMUTATION, Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 31:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.WEAKMUTATION, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH };
+			break;
+		case 32:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.WEAKMUTATION, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 33:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 34:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH };
+			break;
+		case 35:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.EXCEPTION, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 36:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 37:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.BRANCH };
+			break;
+		case 38:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.WEAKMUTATION };
+			break;
+		case 39:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.EXCEPTION };
+			break;
+		case 40:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.METHODNOEXCEPTION };
+			break;
+		case 41:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.OUTPUT };
+			break;
+		case 42:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.CBRANCH };
+			break;
+		case 43:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY};
+			break;
+		}
+
+		return subCriteria;
+	}
+	
+	
+	public Criterion[] getCriteriaDiversity_24(int index) {
+		Criterion[] subCriteria = new Criterion[3];
+		switch (index) {
+		case 0:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY};
+			break;
+		case 1:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.WEAKMUTATION };
+			break;
+		case 2:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.EXCEPTION };
+			break;
+		case 3:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.METHODNOEXCEPTION };
+			break;
+		case 4:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.OUTPUT };
+			break;
+		case 5:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.CBRANCH };
+			break;
+		case 6:
+			subCriteria = new Criterion[] { Criterion.DIVERSITY, Criterion.BRANCH, Criterion.EXCEPTION };
+			break;
+		case 7:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.BRANCH, Criterion.WEAKMUTATION };
+			break;
+		case 8:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.BRANCH, Criterion.OUTPUT };
+			break;
+		case 9:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.BRANCH, Criterion.METHOD };
+			break;
+		case 10:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.BRANCH, Criterion.CBRANCH };
+			break;
+		case 11:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.BRANCH, Criterion.METHODNOEXCEPTION };
+			break;
+		case 12:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.CBRANCH, Criterion.METHOD };
+			break;
+		case 13:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.CBRANCH, Criterion.EXCEPTION };
+			break;
+		case 14:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.CBRANCH, Criterion.METHODNOEXCEPTION };
+			break;
+		case 15:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.CBRANCH, Criterion.WEAKMUTATION };
+			break;
+		case 16:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 17:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 18:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.EXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 19:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.EXCEPTION, Criterion.OUTPUT };
+			break;
+		case 20:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.METHODNOEXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 21:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 22:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.WEAKMUTATION, Criterion.OUTPUT };
+			break;
+		case 23:
+			subCriteria = new Criterion[] {  Criterion.DIVERSITY, Criterion.BRANCH };
+			break;
+		}
+
+		return subCriteria;
+	}
+	
+		
+//	 ---- 70
+	public Criterion[] getCriteriaForBranch(int index) {
+		Criterion[] subCriteria = new Criterion[3];
+		switch (index) {
+		// one
+		case 0:
+			subCriteria = new Criterion[] { Criterion.BRANCH };
+			break;
+		case 1:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION };
+			break;
+		case 2:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION };
+			break;
+		case 3:
+			subCriteria = new Criterion[] { Criterion.METHODNOEXCEPTION };
+			break;
+		case 4:
+			subCriteria = new Criterion[] { Criterion.OUTPUT };
+			break;
+		case 5:
+			subCriteria = new Criterion[] { Criterion.CBRANCH };
+			break;
+		case 6:
+			subCriteria = new Criterion[] { Criterion.METHOD };
+			break;
+		case 7:
+			subCriteria = new Criterion[] { Criterion.LINE };
+			break;
+			
+			// Combinations of two
+		case 8:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.LINE };
+			break;
+		case 9:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.EXCEPTION };
+			break;
+		case 10:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.WEAKMUTATION };
+			break;
+		case 11:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.OUTPUT };
+			break;
+		case 12:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.METHOD };
+			break;
+		case 13:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.CBRANCH };
+			break;
+		case 14:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.METHODNOEXCEPTION };
+			break;
+			
+		case 15:
+			subCriteria = new Criterion[] { Criterion.BRANCH,Criterion.LINE, Criterion.EXCEPTION };
+			break;
+		case 16:
+			subCriteria = new Criterion[] { Criterion.BRANCH,Criterion.LINE, Criterion.METHOD };
+			break;
+		case 17:
+			subCriteria = new Criterion[] { Criterion.BRANCH,Criterion.LINE, Criterion.CBRANCH };
+			break;
+		case 18:
+			subCriteria = new Criterion[] { Criterion.BRANCH,Criterion.LINE, Criterion.METHODNOEXCEPTION };
+			break;
+		case 19:
+			subCriteria = new Criterion[] { Criterion.BRANCH,Criterion.LINE, Criterion.WEAKMUTATION };
+			break;
+		case 20:
+			subCriteria = new Criterion[] { Criterion.BRANCH,Criterion.LINE, Criterion.OUTPUT };
+			break;
+		case 21:
+			subCriteria = new Criterion[] { Criterion.BRANCH,Criterion.CBRANCH, Criterion.METHOD };
+			break;
+		case 22:
+			subCriteria = new Criterion[] { Criterion.BRANCH,Criterion.CBRANCH, Criterion.EXCEPTION };
+			break;
+		case 23:
+			subCriteria = new Criterion[] { Criterion.BRANCH,Criterion.CBRANCH, Criterion.METHODNOEXCEPTION };
+			break;
+		case 24:
+			subCriteria = new Criterion[] { Criterion.BRANCH,Criterion.CBRANCH, Criterion.WEAKMUTATION };
+			break;
+		case 25:
+			subCriteria = new Criterion[] { Criterion.BRANCH,Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 26:
+			subCriteria = new Criterion[] { Criterion.BRANCH,Criterion.METHOD, Criterion.EXCEPTION };
+			break;
+		case 27:
+			subCriteria = new Criterion[] { Criterion.BRANCH,Criterion.METHOD, Criterion.METHODNOEXCEPTION };
+			break;
+		case 28:
+			subCriteria = new Criterion[] { Criterion.BRANCH,Criterion.METHOD, Criterion.WEAKMUTATION };
+			break;
+		case 29:
+			subCriteria = new Criterion[] { Criterion.BRANCH,Criterion.METHOD, Criterion.OUTPUT };
+			break;
+		case 30:
+			subCriteria = new Criterion[] { Criterion.BRANCH,Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 31:
+			subCriteria = new Criterion[] { Criterion.BRANCH,Criterion.EXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 32:
+			subCriteria = new Criterion[] { Criterion.BRANCH,Criterion.EXCEPTION, Criterion.OUTPUT };
+			break;
+		case 33:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.METHODNOEXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 34:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 35:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.OUTPUT };
+			break;
+
+			// Combinations of three
+		case 36:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.LINE, Criterion.METHOD, Criterion.OUTPUT };
+			break;
+		case 37:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.LINE, Criterion.METHOD, Criterion.CBRANCH };
+			break;
+		case 38:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.LINE, Criterion.METHOD, Criterion.METHODNOEXCEPTION };
+			break;
+		case 39:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.LINE, Criterion.METHOD, Criterion.EXCEPTION };
+			break;
+		case 40:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.LINE, Criterion.METHOD, Criterion.WEAKMUTATION };
+			break;
+		case 41:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.LINE, Criterion.WEAKMUTATION, Criterion.OUTPUT };
+			break;
+		case 42:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.LINE, Criterion.WEAKMUTATION, Criterion.CBRANCH };
+			break;
+		case 43:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.LINE, Criterion.WEAKMUTATION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 44:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.LINE, Criterion.WEAKMUTATION, Criterion.EXCEPTION };
+			break;
+		case 45:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.LINE, Criterion.EXCEPTION, Criterion.OUTPUT };
+			break;
+		case 46:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.LINE, Criterion.EXCEPTION, Criterion.CBRANCH };
+			break;
+		case 47:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.LINE, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 48:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.LINE, Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 49:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.LINE, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH };
+			break;
+		case 50:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.LINE, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 51:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.METHOD, Criterion.WEAKMUTATION, Criterion.OUTPUT };
+			break;
+		case 52:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.METHOD, Criterion.WEAKMUTATION, Criterion.CBRANCH };
+			break;
+		case 53:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.METHOD, Criterion.WEAKMUTATION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 54:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.METHOD, Criterion.WEAKMUTATION, Criterion.EXCEPTION };
+			break;
+		case 55:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.METHOD, Criterion.EXCEPTION, Criterion.OUTPUT };
+			break;
+		case 56:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.METHOD, Criterion.EXCEPTION, Criterion.CBRANCH };
+			break;
+		case 57:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.METHOD, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 58:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.METHOD, Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 59:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.METHOD, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH };
+			break;
+		case 60:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.METHOD, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 61:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.EXCEPTION, Criterion.OUTPUT };
+			break;
+		case 62:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.EXCEPTION, Criterion.CBRANCH };
+			break;
+		case 63:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 64:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 65:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH };
+			break;
+		case 66:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 67:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 68:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH };
+			break;
+		case 69:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.EXCEPTION, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 70:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		}
+
+		return subCriteria;
+	}
+	
+//	--- 31
+	public Criterion[] getOneCriteriaStrongMutation(int index) {
+		Criterion[] subCriteria = new Criterion[3];
+		switch (index) {
+		// Combinations of two
+		case 0:
+			subCriteria = new Criterion[] { Criterion.STRONGMUTATION };
+			break;
+		case 1:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.OUTPUT };
+			break;
+		case 2:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.EXCEPTION };
+			break;
+		case 3:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.METHODNOEXCEPTION };
+			break;
+		case 4:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.WEAKMUTATION };
+			break;
+		case 5:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.STRONGMUTATION };
+			break;
+		
+		case 6:
+			subCriteria = new Criterion[] { Criterion.OUTPUT, Criterion.EXCEPTION };
+			break;
+		case 7:
+			subCriteria = new Criterion[] { Criterion.OUTPUT, Criterion.METHODNOEXCEPTION };
+			break;
+		case 8:
+			subCriteria = new Criterion[] { Criterion.OUTPUT, Criterion.WEAKMUTATION };
+			break;
+		case 9:
+			subCriteria = new Criterion[] { Criterion.OUTPUT, Criterion.STRONGMUTATION };
+			break;
+			
+		case 10:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 11:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 12:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.STRONGMUTATION };
+			break;
+			
+		case 13:
+			subCriteria = new Criterion[] { Criterion.METHODNOEXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 14:
+			subCriteria = new Criterion[] { Criterion.METHODNOEXCEPTION, Criterion.STRONGMUTATION };
+			break;
+			
+		case 15:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION, Criterion.STRONGMUTATION };
+			break;	
+			
+		// Combinations of three
+				
+		case 16:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.OUTPUT, Criterion.EXCEPTION };
+			break;
+		case 17:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.OUTPUT, Criterion.METHODNOEXCEPTION };
+			break;
+		case 18:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.OUTPUT, Criterion.WEAKMUTATION };
+			break;
+		case 19:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.OUTPUT, Criterion.STRONGMUTATION };
+			break;
+			
+		case 20:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 21:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.EXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 22:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.EXCEPTION, Criterion.STRONGMUTATION };
+			break;
+			
+		case 23:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.METHODNOEXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 24:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.METHODNOEXCEPTION, Criterion.STRONGMUTATION };
+			break;
+			
+		case 25:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.STRONGMUTATION };
+			break;	
+
+		// one
+		case 26:
+			subCriteria = new Criterion[] { Criterion.BRANCH };
+			break;
+		case 27:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION };
+			break;
+		case 28:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION };
+			break;
+		case 29:
+			subCriteria = new Criterion[] { Criterion.METHODNOEXCEPTION };
+			break;
+		case 30:
+			subCriteria = new Criterion[] { Criterion.OUTPUT };
+			break;
+		
+		}
+		return subCriteria;
+	}
+
+//	No StrongMutation  ---  50
+	public Criterion[] getOneCriteriaNoStrongMutation(int index) {
+		Criterion[] subCriteria = new Criterion[3];
+		switch (index) {
+		// Combinations of two
+		
+		case 0:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.OUTPUT };
+			break;
+		case 1:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.EXCEPTION };
+			break;
+		case 2:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.METHODNOEXCEPTION };
+			break;
+		case 3:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.WEAKMUTATION };
+			break;
+		case 4:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.CBRANCH };
+			break;
+			
+		case 5:
+			subCriteria = new Criterion[] { Criterion.OUTPUT, Criterion.EXCEPTION };
+			break;
+		case 6:
+			subCriteria = new Criterion[] { Criterion.OUTPUT, Criterion.METHODNOEXCEPTION };
+			break;
+		case 7:
+			subCriteria = new Criterion[] { Criterion.OUTPUT, Criterion.WEAKMUTATION };
+			break;
+		case 8:
+			subCriteria = new Criterion[] { Criterion.OUTPUT, Criterion.CBRANCH };
+			break;
+			
+		case 9:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 10:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 11:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION, Criterion.CBRANCH };
+			break;
+			
+		case 12:
+			subCriteria = new Criterion[] { Criterion.METHODNOEXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 13:
+			subCriteria = new Criterion[] { Criterion.METHODNOEXCEPTION, Criterion.CBRANCH };
+			break;
+		// Combinations of three
+				
+		case 14:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.OUTPUT, Criterion.EXCEPTION };
+			break;
+		case 15:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.OUTPUT, Criterion.METHODNOEXCEPTION };
+			break;
+		case 16:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.OUTPUT, Criterion.WEAKMUTATION };
+			break;
+		case 17:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.OUTPUT, Criterion.CBRANCH };
+			break;
+			
+		case 18:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 19:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.EXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 20:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.EXCEPTION, Criterion.CBRANCH };
+			break;
+			
+		case 21:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.METHODNOEXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 22:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH };
+			break;
+		// one
+		case 23:
+			subCriteria = new Criterion[] { Criterion.BRANCH };
+			break;
+		case 24:
+			subCriteria = new Criterion[] { Criterion.CBRANCH };
+			break;
+		case 25:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION };
+			break;
+		case 26:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION };
+			break;
+		case 27:
+			subCriteria = new Criterion[] { Criterion.METHODNOEXCEPTION };
+			break;
+		case 28:
+			subCriteria = new Criterion[] { Criterion.OUTPUT };
+			break;
+		case 29:
+			subCriteria = new Criterion[] { Criterion.STRONGMUTATION };
+			break;
+
+		case 30:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.CBRANCH, Criterion.WEAKMUTATION, Criterion.OUTPUT };
+			break;
+		case 31:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.CBRANCH, Criterion.WEAKMUTATION, Criterion.CBRANCH };
+			break;
+		case 32:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.CBRANCH, Criterion.WEAKMUTATION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 33:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.CBRANCH, Criterion.WEAKMUTATION, Criterion.EXCEPTION };
+			break;
+		case 34:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.CBRANCH, Criterion.EXCEPTION, Criterion.OUTPUT };
+			break;
+		case 35:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.CBRANCH, Criterion.EXCEPTION, Criterion.CBRANCH };
+			break;
+		case 36:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.CBRANCH, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 37:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.CBRANCH, Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 38:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.CBRANCH, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH };
+			break;
+		case 39:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.CBRANCH, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 40:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.EXCEPTION, Criterion.OUTPUT };
+			break;
+		case 41:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.EXCEPTION, Criterion.CBRANCH };
+			break;
+		case 42:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 43:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 44:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH };
+			break;
+		case 45:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 46:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION, Criterion.OUTPUT };
+			break;
+		case 47:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH };
+			break;
+		case 48:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.EXCEPTION, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		case 49:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH, Criterion.OUTPUT };
+			break;
+		
+		}
+		return subCriteria;
+	}
+
+	// 29
+	public Criterion[] getOneCriteriaLongCombunations(int index) {
+		
+		Criterion[] subCriteria = new Criterion[3];
+		switch (index) {
+		// Combinations of two
+		
+		case 0:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.OUTPUT, Criterion.EXCEPTION };
+			break;
+		case 1:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.OUTPUT, Criterion.METHODNOEXCEPTION };
+			break;
+		case 2:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.OUTPUT, Criterion.WEAKMUTATION };
+			break;
+		case 3: 
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.OUTPUT, Criterion.CBRANCH };
+			break;
+		case 4:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.EXCEPTION, Criterion.METHODNOEXCEPTION };
+			break;
+		case 5:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.EXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 6: 
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.EXCEPTION, Criterion.CBRANCH };
+			break;
+		case 7:
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.METHODNOEXCEPTION, Criterion.WEAKMUTATION };
+			break;
+		case 8: 
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH };
+			break;
+		case 9: 
+			subCriteria = new Criterion[] { Criterion.BRANCH, Criterion.WEAKMUTATION, Criterion.CBRANCH };
+			break;
+			
+		case 10:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.OUTPUT, Criterion.CBRANCH, Criterion.EXCEPTION };
+			break;
+		case 11:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.OUTPUT, Criterion.CBRANCH, Criterion.METHODNOEXCEPTION };
+			break;
+		case 12:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.OUTPUT, Criterion.CBRANCH, Criterion.WEAKMUTATION };
+			break;
+		case 13:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.EXCEPTION, Criterion.CBRANCH, Criterion.METHODNOEXCEPTION };
+			break;
+		case 14:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.EXCEPTION, Criterion.CBRANCH, Criterion.WEAKMUTATION };
+			break;
+		case 15:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH, Criterion.WEAKMUTATION };
+			break;
+			
+		case 16:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.OUTPUT};
+			break;
+		case 17:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.EXCEPTION};
+			break;
+		case 18:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.METHODNOEXCEPTION};
+			break;
+		case 19:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.WEAKMUTATION};
+			break;
+		case 20:
+			subCriteria = new Criterion[] {Criterion.BRANCH, Criterion.CBRANCH};
+			break;
+		case 21:
+			subCriteria = new Criterion[] { Criterion.BRANCH };
+			break;
+		case 22:
+			subCriteria = new Criterion[] { Criterion.WEAKMUTATION };
+			break;
+		case 23:
+			subCriteria = new Criterion[] { Criterion.EXCEPTION };
+			break;
+		case 24:
+			subCriteria = new Criterion[] { Criterion.METHODNOEXCEPTION };
+			break;
+		case 25:
+			subCriteria = new Criterion[] { Criterion.OUTPUT };
+			break;
+		case 26:
+			subCriteria = new Criterion[] { Criterion.CBRANCH };
+			break;
+		case 27:
+			subCriteria = new Criterion[] { Criterion.METHOD };
+			break;
+		case 28:
+			subCriteria = new Criterion[] { Criterion.STRONGMUTATION };
+			break;
+		}
+		return subCriteria;
+	}
+		
+
 	public void removeFitnessFunction(Criterion[] temp) {
 		// TestsArchive.instance.reset();
 		Properties.CRITERION = temp;
@@ -1783,7 +2881,7 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	}
 
 	public void updateFitnessFunction(Criterion[] temp, int action) {
-		Properties.CRITERION = temp;
+ 		Properties.CRITERION = temp;
 //		List<TestFitnessFunction> goals = getGoals(true);
 		this.changePopulation(this.getPopulation(action), this.getFitnessFunction(action));
 		calculateFitnessAndSortPopulation();
@@ -1810,10 +2908,12 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	Map<Integer, Object> allPopulationList = new HashMap<Integer, Object>();
 	Map<Integer, Object> allFitnessFunctionList = new HashMap<Integer, Object>();
 
+	@SuppressWarnings("unchecked")
 	protected ArrayList<T> getPopulation(int index) {
 		return (ArrayList<T>) ((ArrayList<T>) allPopulationList.get(index)).clone();
 	}
 
+	@SuppressWarnings("unchecked")
 	protected ArrayList<FitnessFunction<T>> getFitnessFunction(int index) {
 		ArrayList<FitnessFunction<T>> tmp = (ArrayList<FitnessFunction<T>>) allFitnessFunctionList.get(index);
 		return (ArrayList<FitnessFunction<T>>) tmp.clone();
@@ -1835,7 +2935,7 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	protected void deleteFitnessFromPopulation() {
 		for (T individual : population) {
 			individual.clearFitnessVlaue();
-			for (FitnessFunction<?> fitnessFunction : this.fitnessFunctions) {
+			for (FitnessFunction<T> fitnessFunction : this.fitnessFunctions) {
 				individual.addFitness(fitnessFunction);
 			}
 		}

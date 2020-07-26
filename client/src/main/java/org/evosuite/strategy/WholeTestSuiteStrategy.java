@@ -55,6 +55,7 @@ public class WholeTestSuiteStrategy extends TestGenerationStrategy {
 	@Override
 	public TestSuiteChromosome generateTests() {
 		// Set up search algorithm
+		LoggingUtils.getEvoLogger().info("* Using approach: " + Properties.USE_APPROACH);
 		LoggingUtils.getEvoLogger().info("* Setting up search algorithm for whole suite generation");
 		PropertiesSuiteGAFactory algorithmFactory = new PropertiesSuiteGAFactory();
 		GeneticAlgorithm<TestSuiteChromosome> algorithm = algorithmFactory.getSearchAlgorithm();

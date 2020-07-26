@@ -176,6 +176,19 @@ public class EvoSuite {
             } else {
                 javaOpts.add("-Dcriterion=regression");
             }
+            ////////////////////////////////
+            if (line.hasOption("approach")) {
+                //TODO should check if already defined
+                javaOpts.add("-Dapproach=" + line.getOptionValue("Approach"));
+
+                //FIXME should really better handle the validation of javaOpts in the master, not client
+                try {
+                    Properties.getInstance().setValue("approach", line.getOptionValue("approach"));
+                } catch (Exception e) {
+                    throw new Error("Invalid value for approach: "+e.getMessage());
+                }
+            }
+            ///////////////////////////////////
 
             if (line.hasOption("parallel")) {
                 String[] values = line.getOptionValues("parallel");

@@ -83,6 +83,9 @@ public class TestSuiteGeneratorHelper {
       case METHOD:
         LoggingUtils.getEvoLogger().info("  - Top-Level Method Coverage");
         break;
+      case DIVERSITY:
+          LoggingUtils.getEvoLogger().info("  - Diversity Coverage");
+          break;
       case METHODNOEXCEPTION:
         LoggingUtils.getEvoLogger().info("  - No-Exception Top-Level Method Coverage");
         break;

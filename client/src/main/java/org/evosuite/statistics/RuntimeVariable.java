@@ -381,7 +381,13 @@ public enum RuntimeVariable {
 	/* -------------------------------------------------------------------- */
 	/** Search budget needed to reach the maximum coverage */ 
 	/** Used in the comparison between LISP and MOSA */
-	Time2MaxCoverage
+	Time2MaxCoverage,
+	/* Diversity Coverage */
+	Diversity,
+	DiversityCoverage,
+	DiversityFitnessTimeline,
+	DiversityCoverageTimeline,
+	DiversityCoverageBitString,
 	
 	;
 	/* -------------------------------------------------- */

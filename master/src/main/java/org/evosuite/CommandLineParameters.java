@@ -128,6 +128,9 @@ public class CommandLineParameters {
 		parallel.setArgs(3);
 		parallel.setArgName("n i x");
 
+//////////////////
+		Option approach = new Option("approach", true,"The RL algorithm to be used");
+/////////////////
 
 		@SuppressWarnings("static-access")
 		Option property = OptionBuilder.withArgName("property=value").hasArgs(2).withValueSeparator().withDescription("use value for given property").create("D");
@@ -160,7 +163,9 @@ public class CommandLineParameters {
 		options.addOption(heapDump);
 		options.addOption(startedByCtg);
 		options.addOption(parallel);
-
+/////////////////////////
+		options.addOption(approach);
+////////////////////////
 		return options;
 	}
 	

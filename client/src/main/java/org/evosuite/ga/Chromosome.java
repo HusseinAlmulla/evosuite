@@ -284,24 +284,23 @@ public abstract class Chromosome implements Comparable<Chromosome>, Serializable
 	 * and covered Exception
 	 */
 
-	// @Override
-	// public int compareTo(Chromosome c) {
-	//
-	//// if (c instanceof TestChromosome) {
-	//// int i = (int)
-	////
-	//// Math.signum(this.getFitness() - c.getFitness()); if (i == 0){ return
-	//// compareSecondaryObjective(c); }else return i;
-	//// } else {
-	////
-	// int[] GoalThis = analyzeCoverageNew(this);
-	// int[] GoalC = analyzeCoverageNew(c);
-	//// int i = (int) (-1 * (Math.signum((GoalThis[0] + GoalThis[1]) - (GoalC[0] +
-	// GoalC[1]))));
-	// int i = (int) (-1 * (Math.signum(GoalThis[0] - GoalC[0] )));
-	// return i;
-	//// }
-	// }
+//	@Override
+//	public int compareTo(Chromosome c) {
+//
+//		// if (c instanceof TestChromosome) {
+//		// int i = (int)
+//		//
+//		// Math.signum(this.getFitness() - c.getFitness()); if (i == 0){ return
+//		// compareSecondaryObjective(c); }else return i;
+//		// } else {
+//		//
+//		int[] GoalThis = analyzeCoverageNew(this);
+//		int[] GoalC = analyzeCoverageNew(c);
+//		// int i = (int) (-1 * (Math.signum((GoalThis[0] + GoalThis[1]) - (GoalC[0] +GoalC[1]))));
+//		int i = (int) (-1 * (Math.signum(GoalThis[0] - GoalC[0] )));
+//		return i;
+//		// }
+//	}
 
 	public static int[] analyzeCoverageNew(Chromosome c) {
 		// changing the criteria to Exception so archive will deal with TestSuite as the

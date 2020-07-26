@@ -134,6 +134,8 @@ public class CoverageCriteriaAnalyzer {
 
     public static RuntimeVariable getCoverageVariable(Properties.Criterion criterion) {
         switch (criterion) {
+        	case DIVERSITY:
+        		return RuntimeVariable.Diversity;
             case ALLDEFS:
                 return RuntimeVariable.AllDefCoverage;
             case BRANCH:
@@ -354,6 +356,7 @@ public class CoverageCriteriaAnalyzer {
     public static int[] analyzeCoverageNew(TestSuiteChromosome testSuite, Properties.Criterion criterion) {
     	//analyzeCoverage(testSuite, criterion, false);
     	
+    	
     	TestSuiteChromosome testSuiteCopy = testSuite.clone();
     	TestFitnessFactory factory = FitnessFunctions.getFitnessFactory(criterion);
     	List<TestFitnessFunction> goals = factory.getCoverageGoals();
@@ -372,12 +375,16 @@ public class CoverageCriteriaAnalyzer {
 
     	} else {
     		coverage_score = (double) covered / (double) goals.size();
-
     	}
+    	
     	//return coverage_score;
     	int[] ret = {goals.size(),covered};
-    	//int[] ret = {(int)(100*coverage_score),(int)(100*coverage_score)};
     	return ret;        
+    }
+    
+    public static void getDiversityScore(TestSuiteChromosome testSuite) {
+    	double dis = testSuite.getDistance();
+    	LoggingUtils.getEvoLogger().info("* Diversity score: " +  testSuite.getDistance());
     }
 
     ////////////////////////////////////////////////////////

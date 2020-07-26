@@ -223,6 +223,7 @@ public abstract class MutationAssertionGenerator extends AssertionGenerator {
 		}
 	}
 
+	
 	/**
 	 * @param test
 	 * @param mutation_traces

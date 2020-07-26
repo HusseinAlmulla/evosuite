@@ -33,6 +33,7 @@ import org.evosuite.Properties;
 import org.evosuite.TestSuiteGenerator;
 import org.evosuite.TimeController;
 import org.evosuite.coverage.mutation.Mutation;
+import org.evosuite.coverage.mutation.MutationPool;
 import org.evosuite.coverage.mutation.MutationTimeoutStoppingCondition;
 import org.evosuite.rmi.ClientServices;
 import org.evosuite.rmi.service.ClientState;
@@ -100,6 +101,23 @@ public class SimpleMutationAssertionGenerator extends MutationAssertionGenerator
 		calculateMutationScore(tkilled);
 		restoreCriterion(suite);
 	}
+	
+	
+	///////////////////////////////////////////////////////////////////////
+	public double getMutationScore(TestSuiteChromosome suite) {
+
+		setupClassLoader(suite);
+		Set<Integer> tkilled = new HashSet<>();
+
+		for (TestCase test : suite.getTests()) {
+				addAssertions(test, tkilled);
+			}
+		double score = (double) tkilled.size() / (double) MutationPool.getMutantCounter();
+		restoreCriterion(suite);
+	
+		return score;
+	}
+	//////////////////////////////////////////////////////////////////////////
 
 	
 	/**

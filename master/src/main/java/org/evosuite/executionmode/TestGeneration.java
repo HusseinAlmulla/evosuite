@@ -505,6 +505,7 @@ public class TestGeneration {
 				 */
 				for (ClientNodeRemote client : clients) {
 					try {
+						
 						client.startNewSearch();
 					} catch (RemoteException e) {
 						logger.error("Error in starting clients", e);

@@ -592,7 +592,7 @@ public class Properties {
 
 
 	@Parameter(key = "stopping_condition", group = "Search Algorithm", description = "What condition should be checked to end the search")
-	public static StoppingCondition STOPPING_CONDITION = StoppingCondition.MAXTIME;//MAXGENERATIONS;
+	public static StoppingCondition STOPPING_CONDITION = StoppingCondition.MAXTIME;
 
 	public enum CrossoverFunction {
 		SINGLEPOINTRELATIVE, SINGLEPOINTFIXED, SINGLEPOINT, COVERAGE, UNIFORM
@@ -1414,7 +1414,7 @@ public class Properties {
 
 	public enum Criterion {
 		EXCEPTION, DEFUSE, ALLDEFS, BRANCH, CBRANCH, STRONGMUTATION, WEAKMUTATION,
-		MUTATION, STATEMENT, RHO, AMBIGUITY, IBRANCH, READABILITY,
+		MUTATION, STATEMENT, RHO, AMBIGUITY, IBRANCH, READABILITY, DIVERSITY,
         ONLYBRANCH, ONLYMUTATION, METHODTRACE, METHOD, METHODNOEXCEPTION, LINE, ONLYLINE, OUTPUT, INPUT,
         REGRESSION,	REGRESSIONTESTS, TRYCATCH
 	}
@@ -1425,6 +1425,14 @@ public class Properties {
             Criterion.LINE, Criterion.BRANCH, Criterion.EXCEPTION, Criterion.WEAKMUTATION, Criterion.OUTPUT, Criterion.METHOD, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH  };
 
 
+//////////////////
+    public enum APPROACH {EVSNORL,EVSF_UCB,EVSF_DSGSARSA_EPSG,EVSF_DSGSARSA_SOFTMAX}
+	/** Using either "UCB" or "DSG_SARSA" as reinforcement algorithm */
+	@Parameter(key = "approach", description = "What type of RL algorithm is used")
+	public static APPROACH USE_APPROACH = APPROACH.EVSNORL;
+
+/////////////////////
+    
     /** Cache target class */
 	private static Class<?> TARGET_CLASS_INSTANCE = null;
 	

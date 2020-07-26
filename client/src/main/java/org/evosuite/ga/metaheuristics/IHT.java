@@ -1,8 +1,16 @@
 package org.evosuite.ga.metaheuristics;
 
+
+/*
+Original source is in Python
+https://github.com/ShangtongZhang/reinforcement-learning-an-introduction
+*/
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 import antlr.collections.List;
 import org.evosuite.utils.LoggingUtils;
@@ -33,6 +41,8 @@ public class IHT {
 			return false;
 	}
 	
+	Map<Integer, int[]> index_features = new HashMap<Integer, int[]>();
+	
 	public int getIndex(int[] obj ) {
 		
 		Hashtable<int[], Integer> d = dictionary;
@@ -58,9 +68,21 @@ public class IHT {
         }
         else {
         	d.put(obj, count);
+        	saveFeatureWithIndex(obj);
         	//LoggingUtils.getEvoLogger().info("count " + count);
             return count;
         }
+	}
+	
+	public void saveFeatureWithIndex(int[] obj) {
+		Hashtable<int[], Integer> d = dictionary;
+		int index = -2;
+		if(d.get(obj) != null) {
+        	index = (int) d.get(obj);
+        	index_features.put(index, obj);
+		}
+		else
+			LoggingUtils.getEvoLogger().info("\nFeature index not found  XXXXXXXXXXXXXXXXXX\n");
 	}
 
 	public int hashcoords(ArrayList<Integer> coordinates) {
@@ -87,15 +109,7 @@ public class IHT {
 				b += tilingX2;
 			}
 			
-			coords.add(ints);
-			
-			/*String st = "";
-			for(int jj=0; jj< coords.size(); jj++) {
-				st += coords.get(jj).toString();
-			}
-			LoggingUtils.getEvoLogger().info("Coorde " + st);
-			*/
-			
+			coords.add(ints);		
 			Tiles.add(hashcoords(coords));
 		}
 		

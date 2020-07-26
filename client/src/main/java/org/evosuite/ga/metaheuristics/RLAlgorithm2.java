@@ -1,10 +1,5 @@
 package org.evosuite.ga.metaheuristics;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,17 +12,21 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.WeibullDistribution;
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
 
-public class RLAlgorithm {
+
+/**
+ * This class using Tiling coding with Sarsa
+ * @author Hussein
+ *
+ */
+public class RLAlgorithm2 {
 
 	private static int numberOfOption;
 
-	public RLAlgorithm(int num) {
+	public RLAlgorithm2(int num) {
 		numberOfOption = num;
 
-		LCF_SM = new LinearCombination_SoftMaxPolicy(0.5, 0.1);
-		LC_EpP = new LinearCombination_EpslonGreedy(0.4, 0.1);
-		
-		
+		 value_function = new TilingCoding_EpslonGreedy(80, 0.5, 0.1);
+//		value_function = new ValueFunction(0.5, 0.1);
 		selected = new int[numberOfOption];
 		rwd = new double[numberOfOption];
 		mu = new double[numberOfOption];
@@ -89,12 +88,12 @@ public class RLAlgorithm {
 	public void setMu(double[] mu) {
 		this.mu = mu;
 	}
-	
 	/*
 	 * public Variance getVar() { return var; }
 	 * 
 	 * public void setVar(Variance var) { this.var = var; }
 	 */
+
 	public double[] getS() {
 		return s;
 	}
@@ -154,9 +153,7 @@ public class RLAlgorithm {
 		}
 		return ad;
 	}
-	//the variance calculated using the link:
-		// https://math.stackexchange.com/questions/775391/can-i-calculate-the-new-standard-deviation-when-adding-a-value-without-knowing-t
-		//
+
 	public void TS_part2(int counter, int ad, double reward_score) {
 		ad_selected.add(ad);
 		numbers_of_selections[ad] = numbers_of_selections[ad] + 1;
@@ -191,7 +188,7 @@ public class RLAlgorithm {
 		return sums_of_rewards;
 	}
 
-	private double someIdea(int counter, int ad) {
+	private double stupidIdea(int counter, int ad) {
 
 		// calculate the variance for all reward
 		double newMeanTotal = (meanTotal * (counter - 1) + previou_reward) / counter;
@@ -217,7 +214,7 @@ public class RLAlgorithm {
 		int ad = 0;
 		double max_lower_bound = 0;
 
-		if (counter < numberOfOption) {
+		if (counter < 64) {
 			ad = shuffled_options.get(counter);
 		}
 		for (int j = 0; j < numberOfOption; j++) {
@@ -226,15 +223,15 @@ public class RLAlgorithm {
 			if (numbers_of_selections[ind] > 0) {
 				double average_reward = sums_of_rewards[ind] / (double) numbers_of_selections[ind];
 				// 10 is the best for the c
-				double delta_j = ((double) 1 / 100)
+				double delta_j = ((double) 1 / 40)
 						* (Math.sqrt(Math.log((double) (counter)) / (double) numbers_of_selections[ind]));
 				// double delta_j = (((double) 1/5)
 				// * Math.sqrt(Math.log((double) (counter)) / (double)
 				// numbers_of_selections[ind]));
 				// double delta_j = ((double) 1/10) * (Math.log((double) (counter)) / (double)
 				// numbers_of_selections[j]);
-//				 upper_bound = average_reward + delta_j;
-				upper_bound = someIdea(counter, j) + delta_j;
+				// upper_bound = average_reward + delta_j;
+				upper_bound = stupidIdea(counter, j) + delta_j;
 			} else
 				upper_bound = Double.MAX_VALUE;
 			if (upper_bound > max_lower_bound) {
@@ -256,17 +253,27 @@ public class RLAlgorithm {
 
 	//////////////////// DSGSarsa ////////////////////////////
 
-	LinearCombination_SoftMaxPolicy LCF_SM;
-//	RBF_SoftMaxPolicy rbf = new RBF_SoftMaxPolicy();
-	LinearCombination_EpslonGreedy	LC_EpP;
-	
-	
+	 TilingCoding_EpslonGreedy value_function;
+//	ValueFunction value_function;
+
+	// private double[][] w = new double[numberOfOption][8]; //{0.125, 0.125, 0.125,
+	// 0.125,
+	// 0.125, 0.125, 0.125, 0.125};
+
+	/*
+	 * private double R_average = 0; private double beta = 0.312; private double
+	 * alpha = 0.12; private double delta = 0;
+	 * 
+	 * private double[] q = new double[numberOfOption];
+	 */
+
 	private int current_action = 0;
 	private double current_coverage;
 	private int current_size;
 	private int current_numOfCoveredGoal;
 	private double current_fitness;
 	private int current_foundGoal;
+	ArrayList<Integer> op = new ArrayList<Integer>();
 
 	public int getCurrent_foundGoal() {
 		return current_foundGoal;
@@ -276,22 +283,29 @@ public class RLAlgorithm {
 		this.current_foundGoal = current_foundGoal;
 	}
 
+	private int init = 1;
+
 	Random rand = new Random();
 	private int[] selected;
-	private int step = 30;
+	private int step = 10;
 
-	private int getAction(int counter, int coverage, int size, int	numOfCoveredGoal, int fitness, int newFoundGoals) {
+	private int getAction(int counter, double coverage, int size, int numOfCoveredGoal, double fitness,
+			int newFoundGoals) {
 
 		int action = -1;
 		if (counter < numberOfOption) {
 			action = shuffled_options.get(counter);
 			selected[action] += 1;
-			LC_EpP.stateValue((int) coverage * 1000, size, numOfCoveredGoal, (int) fitness, newFoundGoals);
+			 value_function.stateValue(coverage, size, numOfCoveredGoal, fitness,
+			 newFoundGoals);
+//			value_function.stateValue((int) coverage * 1000, numOfCoveredGoal, (int) fitness, newFoundGoals);
 		} else {
 			if (counter % step == 0) {
-				step = (step > 4) ? (step - 1) : 4;
-				// double[] values = value_function.stateValue(coverage, size,numOfCoveredGoal,	 // fitness, newFoundGoals);
-				double[] values = LC_EpP.stateValue((int) coverage , size, numOfCoveredGoal, fitness, newFoundGoals);
+				step = (step > 2) ? (step - 1) : 2;
+				 double[] values = value_function.stateValue(coverage, size, numOfCoveredGoal,
+				 fitness, newFoundGoals);
+//				double[] values = value_function.stateValue((int) coverage * 1000, numOfCoveredGoal,
+//						(int) fitness, newFoundGoals);
 				action = (int) values[1];
 				selected[action] += 1;
 			} else {
@@ -299,32 +313,21 @@ public class RLAlgorithm {
 				selected[action] += 1;
 			}
 		}
+		op.add(action);
 		return action;
 	}
-	//
-	//
 
-	private int getAction_softmax(int counter, double coverage, double numOfCoveredGoal, double fitness,
-			double newFoundGoals) {
-
-		int action = -1;
-		if (counter < numberOfOption) {
-			action = shuffled_options.get(counter);
-			selected[action] += 1;
-			
-		} else {
-			 if (counter % step == 0) {
-			 step = (step > 2) ? (step - 1) : 2;
-			 action = LCF_SM.stateValue(coverage , numOfCoveredGoal, fitness, newFoundGoals);
-			 selected[action] += 1;
-			 } else {
-			action = LCF_SM.SoftMaxPolicy(coverage, numOfCoveredGoal, fitness, newFoundGoals);
-//			action = rbf.SoftMaxPolicy(counter, coverage, numOfCoveredGoal, fitness, newFoundGoals);
-			selected[action] += 1;
-			 }
-		}
-		return action;
-	}
+	// private int getAction_softMax(int counter, double coverage, int size, int
+	// numOfCoveredGoal, double fitness,
+	// int newFoundGoals) {
+	// int action = -1;
+	// double values = value_function.stateValue_softmax(coverage, size,
+	// numOfCoveredGoal, fitness, newFoundGoals, current_action);
+	// action = (int) values;
+	// selected[action] += 1;
+	// op.add(action);
+	// return action;
+	// }
 
 	public int getCurrent_action() {
 		return current_action;
@@ -336,31 +339,19 @@ public class RLAlgorithm {
 
 	double[] rwd;
 
-	
-	/*
-	 * Linear combination function with softmax 
-	 */
-	public void DSGSarsa_part2_LCF_SM(int counter, double newCoverage, int newSize, int newNumOfCoveredGoal, double newFitness,
+	public void DSGSarsa_part2(int counter, double newCoverage, int newSize, int newNumOfCoveredGoal, double newFitness,
 			int newFoundGoals, double reward_score) {
-		
-		// This used with linear combination of feature
-		double cc = (double) Math.round(current_coverage * 1000) / 10000;
-		double nc = (double) Math.round(newCoverage * 1000) / 10000;
 
-		double cf =  (double) Math.round(current_fitness) / 1000;
-		double nf =  (double) Math.round(newFitness) / 1000;
+		int newAction = getAction(counter, newCoverage, newSize, newNumOfCoveredGoal, newFitness, newFoundGoals);
+		 value_function.learn(current_coverage, current_size,
+		 current_numOfCoveredGoal, current_fitness,
+		 current_foundGoal, current_action, newCoverage, newSize, newNumOfCoveredGoal,
+		 newFitness, newFoundGoals,
+		 newAction, reward_score);
 
-		double ccg = (double) Math.round(current_numOfCoveredGoal) / 10000;
-		double ncg = (double) Math.round(newNumOfCoveredGoal) / 10000;
-
-		double cfg = (double) Math.round(current_foundGoal) / 10000;
-		double nfg = (double) Math.round(newFoundGoals) / 10000;
-
-		int newAction = getAction_softmax(counter, nc, ncg, nf, nfg);
-		numbers_of_selections[newAction] += 1;
-
-		LCF_SM.learn(cc, ccg, cf, cfg, current_action, nc, ncg, nf, nfg, newAction, reward_score);
-//		rbf.learn(counter, cc, ccg, cf, cfg, current_action, nc, ncg, nf, nfg, newAction, reward_score);
+//		value_function.learn((int) current_coverage * 1000, current_numOfCoveredGoal, (int) current_fitness,
+//				current_foundGoal, current_action, (int) newCoverage * 1000, newNumOfCoveredGoal,
+//				(int) newFitness, newFoundGoals, newAction, reward_score);
 
 		rwd[getCurrent_action()] += reward_score;
 		current_coverage = newCoverage;
@@ -368,114 +359,82 @@ public class RLAlgorithm {
 		current_numOfCoveredGoal = newNumOfCoveredGoal;
 		current_fitness = newFitness;
 		setCurrent_action(newAction);
-	}
-	
-	public double DSGSarsa_part2_LC_EpsG(int counter, double newCoverage, int newSize, int newNumOfCoveredGoal, double newFitness,
-			int newFoundGoals, double reward_score) {
-		
-		int newAction = getAction(counter, (int)newCoverage*100, newSize, newNumOfCoveredGoal, (int)newFitness, newFoundGoals);
-		numbers_of_selections[newAction] += 1;
-
-		double qValue = LC_EpP.learn((int)current_coverage*100, current_size, current_numOfCoveredGoal, (int)current_fitness, current_foundGoal, current_action, 
-				(int)newCoverage*100, newSize, newNumOfCoveredGoal, (int)newFitness, newFoundGoals, newAction, (int)reward_score);
-
-		rwd[getCurrent_action()] += reward_score;
-		current_coverage = newCoverage;
-		current_size = newSize;
-		current_numOfCoveredGoal = newNumOfCoveredGoal;
-		current_fitness = newFitness;
-		setCurrent_action(newAction);
-		
-		return qValue;
+		numbers_of_selections[newAction] = numbers_of_selections[newAction] + 1;
 	}
 
 	// return the final estimation for the best option that the system recognize
 	public int DSGSarsa_FinalEstimation(double newCoverage, int newSize, int newNumOfCoveredGoal, double newFitness,
 			int newFoundGoals) {
 
-		// double[] val = value_function.stateValue(newCoverage, newSize,
-		// newNumOfCoveredGoal, newFitness, newFoundGoals);
+		 double[] val = value_function.stateValue(newCoverage, newSize,
+		 newNumOfCoveredGoal, newFitness, newFoundGoals);
 
-		// double[] val = value_function.stateValue((int) newCoverage * 1000,
-		// newNumOfCoveredGoal, (int) newFitness,
-		// newFoundGoals);
-
-		double nc = (double) Math.round(newCoverage * 1000) / 1000;
-		double nf = (double) Math.round(newFitness * 100) / 100;
-		double ncg = (double) Math.round(newNumOfCoveredGoal * 1000) / 1000;
-		double nfg = (double) Math.round(newFoundGoals * 1000) / 1000;
-
-		int val = LCF_SM.SoftMaxPolicy(nc, ncg, nf, nfg);
-		
+//		double[] val = value_function.stateValue((int) newCoverage * 1000, newNumOfCoveredGoal, (int) newFitness,
+//				newFoundGoals);
 
 		// double[] val =value_function.printStatesValues(newCoverage, newSize,
 		// newNumOfCoveredGoal, newFitness, newFoundGoals);
-		LoggingUtils.getEvoLogger().info("  max " + val);
-		return val;
+		LoggingUtils.getEvoLogger().info("state value  " + val[0] + "  max " + val[1]);
+		return (int) val[1];
 	}
+
+	/*
+	 * public int DSGSarsa_part1(int counter) { int ad = -1;
+	 * 
+	 * if(init<numberOfOption) { ad = init; init++; } else { if(counter % 2 == 0) {
+	 * ad = getMax(); selected[ad] += 1; } else { ad =
+	 * Math.abs(rand.nextInt(numberOfOption)); wrt.println("Random " + ad);
+	 * selected[ad] += 1; }
+	 * 
+	 * }
+	 * 
+	 * wrt.println("iter "+ iter +"\nad- " + ad); Criterion[] cc = getCriteria(ad);
+	 * String ss = ""; for(int i=0; i<cc.length; i++) ss += cc[i].toString();
+	 * wrt.println("critera  " + ss);
+	 * 
+	 * cs = ns; wcs = wns;
+	 * 
+	 * previous_action = current_action; current_action = ad;
+	 * 
+	 * return ad; }
+	 */
+
+	/*
+	 * public void DSGSarsa_part2(double reward_score) { delta = reward_score -
+	 * R_average + q[current_action] - q[previous_action]; R_average += beta *
+	 * delta;
+	 * 
+	 * wrt.println("Delta "+ delta +",  R_average " + R_average); String str = "";
+	 * 
+	 * for(int i=0; i<8; i++) { w[current_action][i] = w[previous_action][i] +
+	 * (alpha * delta); str += w[i] +","; } wrt.println("W [" + str + "]"); }
+	 */
+	/*
+	 * private int getMax() { int max = 0; for(int i=0; i< numberOfOption; i++) {
+	 * double tmp = 0; for(int j=0; j<8; j++) { tmp += w[i][j];// * x_s_a[i][j]; }
+	 * q[i] = tmp; if(q[i] > q[max]) max = i; } return max; }
+	 */
+
+	/*
+	 * private static Criterion[] mainCriteria = new Criterion[] { Criterion.LINE,
+	 * Criterion.BRANCH, Criterion.EXCEPTION, Criterion.WEAKMUTATION,
+	 * Criterion.OUTPUT, Criterion.METHOD, Criterion.METHODNOEXCEPTION,
+	 * Criterion.CBRANCH };
+	 * 
+	 * public Criterion[] getCriteria(int ad) {
+	 * 
+	 * int[] SA = x_s_a[ad]; int sum = IntStream.of(SA).sum(); Criterion[]
+	 * subCriteria = new Criterion[sum]; int j =0; for(int i=0; i< SA.length; i++) {
+	 * if(SA[i] == 1) { subCriteria[j] = mainCriteria[i]; j++; } } return
+	 * subCriteria; }
+	 * 
+	 */
 
 	public void prt() {
 
-		// int ms = 0;
-		// int mr = 0;
-		// for (int i = 0; i < numberOfOption; i++) {
-		// LoggingUtils.getEvoLogger().info("selected[" + i + "] " + selected[i] + " -
-		// reward " + rwd[i]);
-		// if (selected[i] > selected[ms])
-		// ms = i;
-		// if (rwd[i] > rwd[mr])
-		// mr = i;
-		// }
-		// LoggingUtils.getEvoLogger().info(" Max selected " + ms + " - max reward " +
-		// mr);
-
 		for (int i = 0; i < numberOfOption; i++) {
-			LoggingUtils.getEvoLogger().info("selected[" + i + "]," + numbers_of_selections[i]);
-		}
-
-	}
-
-	public void saveWeights() {
-		try {
-
-			FileWriter fileWriter = new FileWriter("weight.txt");
-			BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-
-			for (int i = 0; i < numberOfOption; i++) {
-				double[] w = LCF_SM.Weights_Action.get(i);
-				String row = String.valueOf(w[0]);
-
-				for (int j = 1; j < w.length; j++) {
-					row += "," + String.valueOf(w[j]);
-				}
-				bufferedWriter.write(row);
-				bufferedWriter.newLine();
-
-			}
-			bufferedWriter.close();
-		} catch (IOException ex) {
-
-		}
-	}
-
-	public void setWeights() {
-		try {
-			FileReader fileReader = new FileReader("weight.txt");
-			BufferedReader bufferedReader = new BufferedReader(fileReader);
-			String line = null;
-			int index = 0;
-			while ((line = bufferedReader.readLine()) != null) {
-				String[] valStr = line.split(",");
-				double[] w = new double[valStr.length];
-				for (int j = 0; j < w.length; j++) {
-					w[j] = Double.valueOf(valStr[j])/100;
-				}
-				LCF_SM.Weights_Action.put(index, w);
-				index++;
-			}
-			bufferedReader.close();
-		} catch (IOException ex) {
-
+			LoggingUtils.getEvoLogger()
+					.info("selected[" + i + "] " + numbers_of_selections[i]);
 		}
 	}
 
